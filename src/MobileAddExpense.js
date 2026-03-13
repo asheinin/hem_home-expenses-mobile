@@ -230,18 +230,9 @@ function setAutoSwitchTrigger(install) {
         if (install) {
             var triggerBuilder = ScriptApp.newTrigger(AUTO_SWITCH_TRIGGER_HANDLER).timeBased();
 
-            var jan;
-            try {
-                jan = ScriptApp.Month.JANUARY;
-            } catch (e) {
-                // Fallback to 1 if ScriptApp.Month is not accessible
-                jan = 1;
-            }
-
             triggerBuilder
                 .onMonthDay(1)
-                .inMonth(jan)
-                .atHour(6)   // 6 AM on Jan 1 (script timezone)
+                .atHour(6)   // Runs on the 1st of every month at 6 AM
                 .create();
             return { success: true, installed: true, message: 'Auto-switch enabled. On January 1st the app will automatically find and connect to the new Home Expenses file.' };
         } else {
@@ -275,7 +266,11 @@ function getSettings() {
  * Searches Google Drive for "Home Expenses {currentYear}" and updates SPREADSHEET_ID.
  */
 function autoSwitchToNewYearFile() {
-    var year = new Date().getFullYear();
+    var now = new Date();
+    // Only proceed if it is January (getMonth() returns 0 for January)
+    if (now.getMonth() !== 0) return;
+
+    var year = now.getFullYear();
     var targetName = SPREADSHEET_NAME_PREFIX + ' ' + year;
 
     Logger.log('Auto year-switch: looking for "' + targetName + '"');
