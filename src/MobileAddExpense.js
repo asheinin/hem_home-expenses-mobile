@@ -226,10 +226,15 @@ function setAutoSwitchTrigger(install) {
         });
 
         if (install) {
-            ScriptApp.newTrigger(AUTO_SWITCH_TRIGGER_HANDLER)
-                .timeBased()
+            var triggerBuilder = ScriptApp.newTrigger(AUTO_SWITCH_TRIGGER_HANDLER).timeBased();
+
+            // Fix: ScriptApp.Month might not be accessible in all contexts/runtimes as expected.
+            // Using a more robust way to specify January.
+            var jan = ScriptApp.Month ? ScriptApp.Month.JANUARY : 1;
+
+            triggerBuilder
                 .onMonthDay(1)
-                .inMonth(ScriptApp.Month.JANUARY)
+                .inMonth(jan)
                 .atHour(6)   // 6 AM on Jan 1 (script timezone)
                 .create();
             return { success: true, installed: true, message: 'Auto-switch enabled. On January 1st the app will automatically find and connect to the new Home Expenses file.' };
