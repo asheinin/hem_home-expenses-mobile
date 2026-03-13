@@ -136,6 +136,7 @@ function _serveMain() {
     template.spouseNames = [spouse1, spouse2].filter(Boolean);
     var now = new Date();
     template.currentDateStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "MMMM dd, yyyy");
+    template.configError = null;
     template.spreadsheetName = ss.getName();
 
     return template
