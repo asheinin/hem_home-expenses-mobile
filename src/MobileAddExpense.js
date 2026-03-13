@@ -134,7 +134,8 @@ function _serveMain() {
     template.expenseTypes = Array.from(expenseTypes).sort();
     template.expensePeriods = Array.from(expensePeriods).sort();
     template.spouseNames = [spouse1, spouse2].filter(Boolean);
-    template.configError = null;
+    var now = new Date();
+    template.currentDateStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "MMMM dd, yyyy");
     template.spreadsheetName = ss.getName();
 
     return template

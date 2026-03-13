@@ -29,11 +29,12 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: flex-start;
             justify-content: center;
-            padding: 20px 16px 48px;
+            padding: 20px 12px 48px;
         }
 
         .card {
@@ -43,6 +44,24 @@
             width: 100%;
             max-width: 480px;
             overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+                background: var(--card);
+            }
+
+            .card {
+                border-radius: 0;
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .card-header {
+                border-radius: 0;
+            }
         }
 
         .card-header {
