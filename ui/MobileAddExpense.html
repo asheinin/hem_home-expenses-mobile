@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Expense · Home Expenses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>var SETTINGS_URL = '<?= ScriptApp.getService().getUrl() ?>?page=settings';</script>
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --text: #1a1a2e;
+            --muted: #6b7280;
+            --bg: #f0f2ff;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #10b981;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px 16px 48px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 24px 24px 18px;
+            color: white;
+        }
+
+        .card-header-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .card-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-link {
+            color: rgba(255, 255, 255, 0.70);
+            text-decoration: none;
+            font-size: 22px;
+            line-height: 1;
+            padding: 2px;
+            transition: color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .settings-link:hover {
+            color: white;
+        }
+
+        .file-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 100px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 14px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .config-error-banner {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .card-header p {
+            font-size: 13px;
+            opacity: 0.80;
+            margin-bottom: 16px;
+        }
+
+        /* ── Mode tabs ── */
+        .mode-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 9px 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.72);
+            transition: background 0.2s, color 0.2s;
+            user-select: none;
+        }
+
+        .mode-tab.active {
+            background: white;
+            color: var(--primary-dark);
+        }
+
+        .mode-desc {
+            font-size: 11px;
+            opacity: 0.75;
+            margin-top: 8px;
+            min-height: 16px;
+            transition: opacity 0.2s;
+        }
+
+        /* ── Body ── */
+        .card-body {
+            padding: 22px 22px 26px;
+        }
+
+        .alert {
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 18px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .required {
+            color: var(--error);
+        }
+
+        /* Inputs & selects — ≥16px to prevent iOS auto-zoom */
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            font-size: 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            color: var(--text);
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+            background: white;
+        }
+
+        .input-error {
+            border-color: var(--error) !important;
+            background: #fff8f8 !important;
+        }
+
+        /* Amount with $ prefix */
+        .prefix-wrap {
+            position: relative;
+        }
+
+        .prefix-wrap .prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .prefix-wrap input {
+            padding-left: 28px;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 18px 0;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        /* Toggle switches */
+        .toggles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+        }
+
+        .toggle-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .toggle-item-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #d1d5db;
+            border-radius: 100px;
+            transition: background 0.25s;
+            cursor: pointer;
+        }
+
+        .slider:before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .switch input:checked+.slider {
+            background: var(--primary);
+        }
+
+        .switch input:checked+.slider:before {
+            transform: translateX(18px);
+        }
+
+        /* Submit */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+            transition: opacity 0.2s, transform 0.15s;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255, 255, 255, 0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+
+        <!-- Header -->
+        <div class="card-header">
+            <div class="card-header-top">
+                <h1>💸 Add Expense</h1>
+                <a class="settings-link" href="javascript:void(0)" onclick="window.open(SETTINGS_URL,'_blank')"
+                    title="Settings">⚙️</a>
+            </div>
+            <? if (spreadsheetName) { ?>
+            <div class="file-chip">📊
+                <?= spreadsheetName ?>
+            </div>
+            <? } ?>
+
+            <div class="mode-tabs">
+                <div class="mode-tab active" id="tab-ot" onclick="setMode('ot')">One-Time</div>
+                <div class="mode-tab" id="tab-rm" onclick="setMode('rm')">Recurrent →</div>
+            </div>
+            <div class="mode-desc" id="modeDesc">Adds expense to the current month only</div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+
+            <? if (configError) { ?>
+            <div class="config-error-banner">
+                ⚠️
+                <?= configError ?><br>
+                <a href="javascript:void(0)" onclick="window.open(SETTINGS_URL,'_blank')"
+                    style="color:#856404;font-weight:600;">Open Settings to configure the spreadsheet →</a>
+            </div>
+            <? } ?>
+
+            <div id="alertBox" class="alert"></div>
+
+            <!-- Expense Name -->
+            <div class="form-group">
+                <label class="field-label" for="expenseName">
+                    Expense Name <span class="required">*</span>
+                </label>
+                <input type="text" id="expenseName" placeholder="e.g. Home Insurance" autocomplete="off">
+            </div>
+
+            <!-- Category (datalist = autocomplete + allows new values) -->
+            <div class="form-group">
+                <label class="field-label" for="expenseType">
+                    Category <span class="required">*</span>
+                </label>
+                <input type="text" id="expenseType" list="typeChoices" placeholder="Select or type new category"
+                    autocomplete="off">
+                <datalist id="typeChoices">
+                    <? for (var i = 0; i < expenseTypes.length; i++) { ?>
+                    <option value="<?= expenseTypes[i] ?>">
+                        <? } ?>
+                </datalist>
+            </div>
+
+            <!-- Amount -->
+            <div class="form-group">
+                <label class="field-label" for="expenseAmount">Amount</label>
+                <div class="prefix-wrap">
+                    <span class="prefix">$</span>
+                    <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title">Options</div>
+
+            <!-- Toggles -->
+            <div class="form-group">
+                <div class="toggles-grid">
+
+                    <label class="toggle-item">
+                        <div class="toggle-item-label">Split</div>
+                        <div class="switch">
+                            <input type="checkbox" id="splitToggle" checked>
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item">
+                        <div class="toggle-item-label">PAP</div>
+                        <div class="switch">
+                            <input type="checkbox" id="papToggle">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item">
+                        <div class="toggle-item-label">Paid</div>
+                        <div class="switch">
+                            <input type="checkbox" id="paidToggle">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+
+            <!-- Billing Period -->
+            <div class="form-group">
+                <label class="field-label" for="expensePeriod">Billing Period</label>
+                <select id="expensePeriod">
+                    <option value="">— Select Period —</option>
+                    <? for (var i = 0; i < expensePeriods.length; i++) { ?>
+                    <option value="<?= expensePeriods[i] ?>">
+                        <?= expensePeriods[i] ?>
+                    </option>
+                    <? } ?>
+                </select>
+            </div>
+
+            <!-- Who Paid -->
+            <div class="form-group">
+                <label class="field-label" for="paidBySelect">Who Paid?</label>
+                <select id="paidBySelect">
+                    <option value="0">— Not Specified —</option>
+                    <? for (var i = 0; i < spouseNames.length; i++) { ?>
+                    <option value="<?= i + 1 ?>">
+                        <?= spouseNames[i] ?>
+                    </option>
+                    <? } ?>
+                </select>
+            </div>
+
+            <!-- Submit -->
+            <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+                <div class="spinner" id="spinner"></div>
+                <span id="btnText">Add Expense</span>
+            </button>
+
+        </div><!-- /card-body -->
+    </div><!-- /card -->
+
+    <script>
+        // ── Mode ─────────────────────────────────────────────────────────────────
+        var currentMode = 'ot';
+        var modeDescriptions = {
+            'ot': 'Adds expense to the current month only',
+            'rm': 'Adds expense from current month through December'
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('tab-ot').classList.toggle('active', mode === 'ot');
+            document.getElementById('tab-rm').classList.toggle('active', mode === 'rm');
+            document.getElementById('modeDesc').textContent = modeDescriptions[mode];
+        }
+
+        // ── PAP / Paid mutual exclusivity ─────────────────────────────────────────
+        document.getElementById('papToggle').addEventListener('change', function () {
+            if (this.checked) document.getElementById('paidToggle').checked = false;
+        });
+        document.getElementById('paidToggle').addEventListener('change', function () {
+            if (this.checked) document.getElementById('papToggle').checked = false;
+        });
+
+        // ── Submission ────────────────────────────────────────────────────────────
+        function submitForm() {
+            clearAlert();
+
+            var name = document.getElementById('expenseName').value.trim();
+            var type = document.getElementById('expenseType').value.trim();
+            var amount = document.getElementById('expenseAmount').value;
+            var pap = document.getElementById('papToggle').checked;
+            var split = document.getElementById('splitToggle').checked;
+            var paid = document.getElementById('paidToggle').checked;
+            var period = document.getElementById('expensePeriod').value;
+
+            var paidBySelect = document.getElementById('paidBySelect');
+            var paidByIndex = parseInt(paidBySelect.value) || 0;
+            var paidByName = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
+
+            // Client-side validation
+            var errors = [];
+            if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
+            if (!type) { errors.push('Category is required.'); markError('expenseType'); }
+            if (amount !== '' && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0)) {
+                errors.push('Amount must be a positive number.');
+                markError('expenseAmount');
+            }
+
+            if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
+
+            setLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function (result) {
+                    setLoading(false);
+                    if (result && result.success) {
+                        showAlert('✅ ' + result.message, 'success');
+                        resetForm();
+                    } else {
+                        showAlert('⚠️ ' + (result ? result.message : 'Unknown error'), 'error');
+                    }
+                })
+                .withFailureHandler(function (err) {
+                    setLoading(false);
+                    showAlert('❌ Server error: ' + err.message, 'error');
+                })
+                .mobileProcessForm(name, type, amount, pap, period, currentMode, split, paid, paidByName, paidByIndex);
+        }
+
+        // ── UI helpers ────────────────────────────────────────────────────────────
+        function showAlert(msg, type) {
+            var box = document.getElementById('alertBox');
+            box.textContent = msg;
+            box.className = 'alert alert-' + type;
+            box.style.display = 'block';
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function clearAlert() {
+            document.getElementById('alertBox').style.display = 'none';
+            ['expenseName', 'expenseType', 'expenseAmount'].forEach(function (id) {
+                document.getElementById(id).classList.remove('input-error');
+            });
+        }
+
+        function markError(id) {
+            document.getElementById(id).classList.add('input-error');
+        }
+
+        function setLoading(on) {
+            document.getElementById('submitBtn').disabled = on;
+            document.getElementById('spinner').style.display = on ? 'block' : 'none';
+            document.getElementById('btnText').textContent = on ? 'Adding…' : 'Add Expense';
+        }
+
+        function resetForm() {
+            document.getElementById('expenseName').value = '';
+            document.getElementById('expenseType').value = '';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('splitToggle').checked = true;
+            document.getElementById('papToggle').checked = false;
+            document.getElementById('paidToggle').checked = false;
+            document.getElementById('expensePeriod').value = '';
+            document.getElementById('paidBySelect').value = '0';
+        }
+    </script>
+</body>
+
+</html>

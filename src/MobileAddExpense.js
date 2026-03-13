@@ -1,0 +1,410 @@
+/**
+ * Mobile Add Expense Web App — Home Expenses
+ *
+ * Standalone GAS web app (separate from the HomeExpenses script).
+ * Accesses the Home Expenses spreadsheet via its ID, stored in Script Properties.
+ *
+ * Setup (one-time):
+ *   1. In the Apps Script editor for THIS project, go to
+ *      Project Settings → Script Properties and add:
+ *        SPREADSHEET_ID = <the ID from the Home Expenses spreadsheet URL>
+ *   2. Deploy as Web App:
+ *        Execute as: Me (owner)
+ *        Who has access: Anyone with Google Account
+ *
+ * Settings page: append ?page=settings to the web app URL.
+ */
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+var SPREADSHEET_NAME_PREFIX = 'Home Expenses'; // used when searching by name
+var AUTO_SWITCH_TRIGGER_HANDLER = 'autoSwitchToNewYearFile';
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function _getSpreadsheetId() {
+    var id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+    if (!id) throw new Error('SPREADSHEET_ID is not set. Open the Settings page to configure it.');
+    return id;
+}
+
+function _getSpreadsheet() {
+    return SpreadsheetApp.openById(_getSpreadsheetId());
+}
+
+function _monthName(monthNum) {
+    var months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[monthNum - 1] || String(monthNum);
+}
+
+/** Extract a spreadsheet ID from a Google Sheets URL, or return as-is if already an ID. */
+function _extractId(input) {
+    input = input.trim();
+    // Match /d/<id>/ or /spreadsheets/d/<id>
+    var m = input.match(/\/d\/([a-zA-Z0-9_-]{25,})/);
+    if (m) return m[1];
+    // Looks like a raw ID (no slashes)
+    if (/^[a-zA-Z0-9_-]{25,}$/.test(input)) return input;
+    return null;
+}
+
+/** Find the most recent "Home Expenses {year}" file in Drive and return {id, name}. */
+function _findFileByName(name) {
+    var files = DriveApp.getFilesByName(name);
+    if (files.hasNext()) {
+        var f = files.next();
+        return { id: f.getId(), name: f.getName() };
+    }
+    return null;
+}
+
+/** Check whether the yearly auto-switch trigger is installed. */
+function _autoSwitchTriggerInstalled() {
+    var triggers = ScriptApp.getProjectTriggers();
+    for (var i = 0; i < triggers.length; i++) {
+        if (triggers[i].getHandlerFunction() === AUTO_SWITCH_TRIGGER_HANDLER) return true;
+    }
+    return false;
+}
+
+// ============================================================================
+// Web App entry point
+// ============================================================================
+
+function doGet(e) {
+    var page = (e && e.parameter && e.parameter.page) || 'main';
+
+    if (page === 'settings') {
+        return _serveSettings();
+    }
+    return _serveMain();
+}
+
+function _serveMain() {
+    var myNumbers = new staticNumbers();
+    var ss;
+
+    try {
+        ss = _getSpreadsheet();
+    } catch (err) {
+        // Spreadsheet not configured yet — redirect to settings
+        var errTemplate = HtmlService.createTemplateFromFile('ui/MobileAddExpense');
+        errTemplate.expenseTypes = [];
+        errTemplate.expensePeriods = [];
+        errTemplate.spouseNames = [];
+        errTemplate.configError = err.message;
+        return errTemplate
+            .evaluate()
+            .setTitle('Add Expense · Home Expenses')
+            .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+            .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
+
+    var sheets = ss.getSheets();
+    var expenseTypes = new Set();
+    var expensePeriods = new Set();
+
+    for (var i = 1; i < Math.min(sheets.length, 12); i++) {
+        var sheet = sheets[i];
+        var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
+        var values = sheet
+            .getRange(myNumbers.expenseFirstRow, 1, numRows, myNumbers.expensePAPColumn)
+            .getValues();
+
+        values.forEach(function (row) {
+            var t = row[myNumbers.expenseTypeColumn - 1];
+            var p = row[myNumbers.expencePeriodColumn - 1];
+            if (t) expenseTypes.add(t.toString().trim());
+            if (p) expensePeriods.add(p.toString().trim());
+        });
+    }
+
+    var dashboard = sheets[0];
+    var spouse1 = dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse1NameColumn).getValue();
+    var spouse2 = dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse2NameColumn).getValue();
+
+    var template = HtmlService.createTemplateFromFile('ui/MobileAddExpense');
+    template.expenseTypes = Array.from(expenseTypes).sort();
+    template.expensePeriods = Array.from(expensePeriods).sort();
+    template.spouseNames = [spouse1, spouse2].filter(Boolean);
+    template.configError = null;
+    template.spreadsheetName = ss.getName();
+
+    return template
+        .evaluate()
+        .setTitle('Add Expense · Home Expenses')
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function _serveSettings() {
+    var props = PropertiesService.getScriptProperties();
+    var currentId = props.getProperty('SPREADSHEET_ID') || '';
+    var currentName = '';
+
+    if (currentId) {
+        try {
+            currentName = SpreadsheetApp.openById(currentId).getName();
+        } catch (e) {
+            currentName = '(file not accessible — ID may be stale)';
+        }
+    }
+
+    var template = HtmlService.createTemplateFromFile('ui/Settings');
+    template.currentId = currentId;
+    template.currentName = currentName;
+    template.autoSwitchInstalled = _autoSwitchTriggerInstalled();
+    template.nextYear = new Date().getFullYear() + 1;
+
+    return template
+        .evaluate()
+        .setTitle('Settings · Home Expenses Mobile')
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// ============================================================================
+// Settings actions (called from Settings page via google.script.run)
+// ============================================================================
+
+/**
+ * Save spreadsheet configuration.
+ * @param {string} input  Google Sheets URL, spreadsheet ID, or Drive file name
+ * @returns {{success: boolean, message: string, name: string}}
+ */
+function saveSpreadsheetConfig(input) {
+    try {
+        input = (input || '').trim();
+        if (!input) return { success: false, message: 'Please enter a URL, ID, or file name.' };
+
+        var id = _extractId(input);
+        var name = '';
+
+        if (id) {
+            // URL or raw ID
+            try {
+                name = SpreadsheetApp.openById(id).getName();
+            } catch (e) {
+                return { success: false, message: 'Could not open spreadsheet. Check the URL/ID and make sure it is shared with this script\'s owner account.' };
+            }
+        } else {
+            // Treat as a file name — search Drive
+            var found = _findFileByName(input);
+            if (!found) {
+                return { success: false, message: 'File "' + input + '" not found in Google Drive. Make sure the name matches exactly.' };
+            }
+            id = found.id;
+            name = found.name;
+        }
+
+        PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', id);
+        return { success: true, message: 'Connected to "' + name + '".', name: name };
+
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, message: 'Unexpected error: ' + err.toString() };
+    }
+}
+
+/**
+ * Install or remove the January 1st auto-switch trigger.
+ * @param {boolean} install  true = install, false = remove
+ * @returns {{success: boolean, message: string, installed: boolean}}
+ */
+function setAutoSwitchTrigger(install) {
+    try {
+        // Remove existing trigger first (avoid duplicates)
+        ScriptApp.getProjectTriggers().forEach(function (t) {
+            if (t.getHandlerFunction() === AUTO_SWITCH_TRIGGER_HANDLER) ScriptApp.deleteTrigger(t);
+        });
+
+        if (install) {
+            ScriptApp.newTrigger(AUTO_SWITCH_TRIGGER_HANDLER)
+                .timeBased()
+                .onMonthDay(1)
+                .inMonth(ScriptApp.Month.JANUARY)
+                .atHour(6)   // 6 AM on Jan 1 (script timezone)
+                .create();
+            return { success: true, installed: true, message: 'Auto-switch enabled. On January 1st the app will automatically find and connect to the new Home Expenses file.' };
+        } else {
+            return { success: true, installed: false, message: 'Auto-switch disabled.' };
+        }
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, installed: _autoSwitchTriggerInstalled(), message: 'Error: ' + err.toString() };
+    }
+}
+
+/**
+ * Get current settings (called on page load to refresh state without reload).
+ * @returns {{id: string, name: string, autoSwitchInstalled: boolean}}
+ */
+function getSettings() {
+    var id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '';
+    var name = '';
+    if (id) {
+        try { name = SpreadsheetApp.openById(id).getName(); } catch (e) { name = '(not accessible)'; }
+    }
+    return { id: id, name: name, autoSwitchInstalled: _autoSwitchTriggerInstalled() };
+}
+
+// ============================================================================
+// Auto year-switch (triggered on Jan 1)
+// ============================================================================
+
+/**
+ * Time-based trigger handler: runs on January 1st each year.
+ * Searches Google Drive for "Home Expenses {currentYear}" and updates SPREADSHEET_ID.
+ */
+function autoSwitchToNewYearFile() {
+    var year = new Date().getFullYear();
+    var targetName = SPREADSHEET_NAME_PREFIX + ' ' + year;
+
+    Logger.log('Auto year-switch: looking for "' + targetName + '"');
+
+    var found = _findFileByName(targetName);
+    if (!found) {
+        Logger.log('Auto year-switch: file not found — "' + targetName + '"');
+        return;
+    }
+
+    PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', found.id);
+    Logger.log('Auto year-switch: switched to "' + found.name + '" (' + found.id + ')');
+}
+
+// ============================================================================
+// Expense form submission (mobile-safe — no getUi() calls)
+// ============================================================================
+
+/**
+ * Called from the client via google.script.run.mobileProcessForm(...)
+ *
+ * @param {string}  newExpenseItem  Expense description / name
+ * @param {string}  newExpenseType  Category / type
+ * @param {string}  expenseAmount   Dollar amount as string; empty = unpopulated
+ * @param {boolean} pap             Pre-authorized payment flag
+ * @param {string}  expensePeriod   Billing period (e.g. "Monthly")
+ * @param {string}  mode            'ot' = one-time this month | 'rm' = recurrent from this month onward
+ * @param {boolean} split           Split between spouses flag
+ * @param {boolean} paid            Paid flag
+ * @param {string}  paidByName      Display name of paying spouse
+ * @param {number}  paidByIndex     0 = not specified, 1 = spouse2 pays, 2 = spouse1 pays
+ * @returns {{success: boolean, message: string}}
+ */
+function mobileProcessForm(
+    newExpenseItem,
+    newExpenseType,
+    expenseAmount,
+    pap,
+    expensePeriod,
+    mode,
+    split,
+    paid,
+    paidByName,
+    paidByIndex
+) {
+    try {
+        var myNumbers = new staticNumbers();
+
+        if (!newExpenseItem) return { success: false, message: 'Expense Name is required.' };
+        if (!newExpenseType) return { success: false, message: 'Category is required.' };
+
+        var amount;
+        if (expenseAmount !== '' && expenseAmount !== null && expenseAmount !== undefined) {
+            amount = parseFloat(expenseAmount);
+            if (isNaN(amount) || amount < 0) {
+                return { success: false, message: 'Amount must be a positive number.' };
+            }
+            amount = parseFloat(amount.toFixed(2));
+        } else {
+            amount = -1;
+        }
+
+        var date = new Date();
+        var currentMonth = date.getMonth() + 1;
+        var mStart = currentMonth;
+        var mEnd = (mode === 'rm') ? 12 : currentMonth;
+
+        var ss = _getSpreadsheet();
+        var numOfRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
+        var amountColIdx = myNumbers.expenseAmountColumn - 1;
+
+        for (var i = mStart; i <= mEnd; i++) {
+            var sheet = ss.getSheets()[i];
+            var descriptions = sheet
+                .getRange(myNumbers.expenseFirstRow, myNumbers.expenseDescrColumn, numOfRows)
+                .getValues()
+                .flat();
+
+            var existingIndex = descriptions.indexOf(newExpenseItem);
+
+            if (existingIndex !== -1) {
+                var row = existingIndex + myNumbers.expenseFirstRow;
+                sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
+
+                if (amount !== -1) {
+                    sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(amount);
+                    if (paidByIndex == 1) sheet.getRange(row, myNumbers.expenseSecondPayColumn).setValue(amount);
+                    if (paidByIndex == 2) sheet.getRange(row, myNumbers.expenseFirstPayColumn).setValue(amount);
+                }
+
+                sheet.getRange(row, myNumbers.expenseTypeColumn).setValue(newExpenseType);
+                sheet.getRange(row, myNumbers.expensePAPColumn).setValue(pap ? 'PAP' : '');
+                sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
+                sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
+                sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+
+            } else {
+                var expenseData = sheet
+                    .getRange(myNumbers.expenseFirstRow, 1, numOfRows, myNumbers.expenseAmountColumn)
+                    .getValues();
+                var inserted = false;
+
+                for (var j = 0; j < numOfRows; j++) {
+                    var rowData = expenseData[j];
+                    if ((rowData[0] === '' || rowData[0] == null) &&
+                        (rowData[amountColIdx] === '' || rowData[amountColIdx] == null)) {
+                        var newRow = j + myNumbers.expenseFirstRow;
+
+                        sheet.getRange(newRow, myNumbers.expenseDescrColumn).setValue(newExpenseItem);
+                        sheet.getRange(newRow, myNumbers.expenseTypeColumn).setValue(newExpenseType);
+
+                        if (amount !== -1) {
+                            sheet.getRange(newRow, myNumbers.expenseAmountColumn).setValue(amount);
+                            if (paidByIndex == 1) sheet.getRange(newRow, myNumbers.expenseSecondPayColumn).setValue(amount);
+                            if (paidByIndex == 2) sheet.getRange(newRow, myNumbers.expenseFirstPayColumn).setValue(amount);
+                        }
+
+                        sheet.getRange(newRow, myNumbers.expensePAPColumn).setValue(pap ? 'PAP' : '');
+                        sheet.getRange(newRow, myNumbers.expencePeriodColumn).setValue(expensePeriod);
+                        sheet.getRange(newRow, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
+                        sheet.getRange(newRow, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+
+                        inserted = true;
+                        break;
+                    }
+                }
+
+                if (!inserted) {
+                    return { success: false, message: 'No space to add expense in ' + _monthName(i) + '.' };
+                }
+            }
+        }
+
+        var label = mode === 'rm'
+            ? 'from ' + _monthName(mStart) + ' through December'
+            : 'in ' + _monthName(mStart);
+        return { success: true, message: '"' + newExpenseItem + '" added ' + label + '.' };
+
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, message: 'Error: ' + err.toString() };
+    }
+}

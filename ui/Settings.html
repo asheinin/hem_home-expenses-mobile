@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings · Home Expenses Mobile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --text: #1a1a2e;
+            --muted: #6b7280;
+            --border: #e2e8f0;
+            --card: #ffffff;
+            --error: #ef4444;
+            --success: #10b981;
+            --warn: #f59e0b;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px 16px 48px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 22px 24px 20px;
+            color: white;
+        }
+
+        .card-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.78);
+            text-decoration: none;
+            margin-bottom: 14px;
+            transition: color 0.15s;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        .card-body {
+            padding: 22px 22px 28px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        /* Current file badge */
+        .file-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f7f4;
+            border: 1.5px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+
+        .file-badge.not-set {
+            background: #fff8f1;
+            border-color: #fed7aa;
+        }
+
+        .file-badge .file-icon {
+            font-size: 22px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .file-badge .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-badge .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-badge .file-label {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* Input */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 13px 14px;
+            font-size: 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            color: var(--text);
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+            background: white;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            border: none;
+            border-radius: 11px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 5px 16px rgba(102, 126, 234, 0.32);
+        }
+
+        .btn-danger {
+            background: #fef2f2;
+            color: var(--error);
+            border: 1.5px solid #fecaca;
+        }
+
+        .btn-success {
+            background: #ecfdf5;
+            color: var(--success);
+            border: 1.5px solid #a7f3d0;
+        }
+
+        /* Alert */
+        .alert {
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Trigger toggle row */
+        .trigger-card {
+            background: #f8f9ff;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .trigger-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .trigger-info {
+            flex: 1;
+        }
+
+        .trigger-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .trigger-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        /* Toggle switch */
+        .switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #d1d5db;
+            border-radius: 100px;
+            transition: background 0.25s;
+            cursor: pointer;
+        }
+
+        .slider:before {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .switch input:checked+.slider {
+            background: var(--success);
+        }
+
+        .switch input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .trigger-status {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 7px 10px;
+            border-radius: 8px;
+        }
+
+        .trigger-status.on {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .trigger-status.off {
+            background: #f9fafb;
+            color: var(--muted);
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 22px 0;
+        }
+
+        .spinner {
+            display: none;
+            width: 17px;
+            height: 17px;
+            border: 2.5px solid rgba(255, 255, 255, 0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+
+        <div class="card-header">
+            <a class="back-link" href="javascript:history.back()">← Back to form</a>
+            <h1>⚙️ Settings</h1>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ── Current file ── -->
+            <div class="section">
+                <div class="section-title">Connected Spreadsheet</div>
+
+                <? if (currentId) { ?>
+                <div class="file-badge" id="fileBadge">
+                    <span class="file-icon">📊</span>
+                    <div class="file-info">
+                        <div class="file-name" id="currentFileName">
+                            <?= currentName ?>
+                        </div>
+                        <div class="file-label">Currently connected</div>
+                    </div>
+                </div>
+                <? } else { ?>
+                <div class="file-badge not-set" id="fileBadge">
+                    <span class="file-icon">⚠️</span>
+                    <div class="file-info">
+                        <div class="file-name" id="currentFileName">Not configured</div>
+                        <div class="file-label">Enter a URL or file name below</div>
+                    </div>
+                </div>
+                <? } ?>
+
+                <div id="configAlert" class="alert"></div>
+
+                <div class="form-group">
+                    <label class="field-label">Spreadsheet URL, ID, or Drive File Name</label>
+                    <input type="text" id="spreadsheetInput" placeholder="Paste URL  or  type 'Home Expenses 2027'"
+                        value="<?= currentId ?>">
+                    <p class="hint">
+                        Accepts: full Google Sheets URL · spreadsheet ID · exact Drive file name<br>
+                        Example name: <strong>Home Expenses 2027</strong>
+                    </p>
+                </div>
+                <button class="btn btn-primary" id="saveBtn" onclick="saveConfig()">
+                    <div class="spinner" id="saveSpinner"></div>
+                    <span id="saveBtnText">Connect Spreadsheet</span>
+                </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ── Auto year-switch trigger ── -->
+            <div class="section">
+                <div class="section-title">Auto Year-Switch</div>
+
+                <div class="trigger-card">
+                    <div class="trigger-row">
+                        <div class="trigger-info">
+                            <div class="trigger-title">Switch file on January 1st</div>
+                            <div class="trigger-sub">
+                                Automatically finds <em>Home Expenses
+                                    <?= nextYear ?>
+                                </em> in your Drive
+                                and connects to it each New Year's Day at 6 AM.
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="autoSwitchToggle" <?=autoSwitchInstalled ? 'checked' : '' ?>
+                            onchange="toggleAutoSwitch(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="trigger-status <?= autoSwitchInstalled ? 'on' : 'off' ?>" id="triggerStatus">
+                        <? if (autoSwitchInstalled) { ?>
+                        ✅ Active — will auto-switch on 1 Jan
+                        <?= nextYear ?>
+                        <? } else { ?>
+                        ○ Disabled
+                        <? } ?>
+                    </div>
+                </div>
+
+                <div id="triggerAlert" class="alert" style="margin-top:12px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ── Connect spreadsheet ───────────────────────────────────────────────────
+        function saveConfig() {
+            var input = document.getElementById('spreadsheetInput').value.trim();
+            if (!input) { showAlert('configAlert', 'Please enter a URL or file name.', 'error'); return; }
+
+            setLoading('saveBtn', 'saveSpinner', 'saveBtnText', true, 'Connecting…');
+
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    setLoading('saveBtn', 'saveSpinner', 'saveBtnText', false, 'Connect Spreadsheet');
+                    if (r.success) {
+                        showAlert('configAlert', '✅ ' + r.message, 'success');
+                        document.getElementById('currentFileName').textContent = r.name;
+                        document.getElementById('fileBadge').className = 'file-badge';
+                    } else {
+                        showAlert('configAlert', '⚠️ ' + r.message, 'error');
+                    }
+                })
+                .withFailureHandler(function (err) {
+                    setLoading('saveBtn', 'saveSpinner', 'saveBtnText', false, 'Connect Spreadsheet');
+                    showAlert('configAlert', '❌ ' + err.message, 'error');
+                })
+                .saveSpreadsheetConfig(input);
+        }
+
+        // ── Toggle auto-switch trigger ────────────────────────────────────────────
+        function toggleAutoSwitch(install) {
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    var statusEl = document.getElementById('triggerStatus');
+                    if (r.success) {
+                        showAlert('triggerAlert', (r.installed ? '✅' : '○') + ' ' + r.message, r.installed ? 'success' : 'info');
+                        statusEl.className = 'trigger-status ' + (r.installed ? 'on' : 'off');
+                        statusEl.textContent = r.installed
+                            ? '✅ Active — will auto-switch on 1 Jan'
+                            : '○ Disabled';
+                        document.getElementById('autoSwitchToggle').checked = r.installed;
+                    } else {
+                        showAlert('triggerAlert', '⚠️ ' + r.message, 'error');
+                        document.getElementById('autoSwitchToggle').checked = r.installed;
+                    }
+                })
+                .withFailureHandler(function (err) {
+                    showAlert('triggerAlert', '❌ ' + err.message, 'error');
+                })
+                .setAutoSwitchTrigger(install);
+        }
+
+        // ── UI helpers ────────────────────────────────────────────────────────────
+        function showAlert(id, msg, type) {
+            var el = document.getElementById(id);
+            el.textContent = msg;
+            el.className = 'alert alert-' + type;
+            el.style.display = 'block';
+        }
+
+        function setLoading(btnId, spinnerId, textId, on, label) {
+            document.getElementById(btnId).disabled = on;
+            document.getElementById(spinnerId).style.display = on ? 'block' : 'none';
+            document.getElementById(textId).textContent = label;
+        }
+    </script>
+</body>
+
+</html>
