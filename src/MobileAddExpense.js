@@ -228,9 +228,13 @@ function setAutoSwitchTrigger(install) {
         if (install) {
             var triggerBuilder = ScriptApp.newTrigger(AUTO_SWITCH_TRIGGER_HANDLER).timeBased();
 
-            // Fix: ScriptApp.Month might not be accessible in all contexts/runtimes as expected.
-            // Using a more robust way to specify January.
-            var jan = ScriptApp.Month ? ScriptApp.Month.JANUARY : 1;
+            var jan;
+            try {
+                jan = ScriptApp.Month.JANUARY;
+            } catch (e) {
+                // Fallback to 1 if ScriptApp.Month is not accessible
+                jan = 1;
+            }
 
             triggerBuilder
                 .onMonthDay(1)

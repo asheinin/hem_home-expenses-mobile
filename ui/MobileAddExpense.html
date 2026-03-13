@@ -392,7 +392,7 @@
         <div class="card-header">
             <div class="card-header-top">
                 <h1>💸 Add Expense</h1>
-                <a class="settings-link" href="javascript:void(0)" onclick="window.location.href=SETTINGS_URL"
+                <a class="settings-link" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
                     title="Settings">⚙️</a>
             </div>
             <? if (spreadsheetName) { ?>
@@ -415,7 +415,7 @@
             <div class="config-error-banner">
                 ⚠️
                 <?= configError ?><br>
-                <a href="javascript:void(0)" onclick="window.location.href=SETTINGS_URL"
+                <a href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
                     style="color:#856404;font-weight:600;">Open Settings to configure the spreadsheet →</a>
             </div>
             <? } ?>
