@@ -421,6 +421,170 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* ── Reference Panel ── */
+        .ref-panel {
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .ref-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: #f8f9ff;
+            cursor: pointer;
+            user-select: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: background 0.15s;
+            gap: 8px;
+        }
+
+        .ref-toggle:hover {
+            background: #eef0ff;
+        }
+
+        .ref-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex: 1;
+        }
+
+        .ref-count {
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--primary);
+            color: white;
+            border-radius: 100px;
+            padding: 1px 7px;
+        }
+
+        .ref-chevron {
+            font-size: 16px;
+            transition: transform 0.22s;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .ref-chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .ref-body {
+            display: none;
+            max-height: 280px;
+            overflow-y: auto;
+            border-top: 1.5px solid var(--border);
+        }
+
+        .ref-body.open {
+            display: block;
+        }
+
+        .ref-loading {
+            padding: 14px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        .ref-table thead th {
+            position: sticky;
+            top: 0;
+            background: #f0f2ff;
+            padding: 7px 12px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .ref-table tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.12s;
+        }
+
+        .ref-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .ref-table tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        .ref-table td {
+            padding: 8px 12px;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        .ref-table td.ref-amount {
+            font-weight: 600;
+            color: var(--primary-dark);
+            white-space: nowrap;
+        }
+
+        .ref-type-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.10);
+            color: var(--primary-dark);
+            border-radius: 6px;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* ── Duplicate warning ── */
+        .alert-warn {
+            background: #fff8ec;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .warn-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-warn {
+            flex: 1;
+            padding: 9px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .btn-warn-cancel {
+            background: #e5e7eb;
+            color: var(--text);
+        }
+
+        .btn-warn-continue {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-warn:active { opacity: 0.75; }
     </style>
 </head>
 
@@ -465,6 +629,30 @@
             <? } ?>
 
             <div id="alertBox" class="alert"></div>
+
+            <!-- Current-month reference accordion -->
+            <div class="ref-panel" id="refPanel">
+                <div class="ref-toggle" id="refToggle" onclick="toggleRefPanel()">
+                    <span class="ref-toggle-label">
+                        📋 <span id="refTitle">This Month's Expenses</span>
+                        <span class="ref-count" id="refCount" style="display:none">0</span>
+                    </span>
+                    <span class="ref-chevron" id="refChevron">▾</span>
+                </div>
+                <div class="ref-body" id="refBody">
+                    <div class="ref-loading" id="refLoading">Loading…</div>
+                    <table class="ref-table" id="refTable" style="display:none">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th style="text-align:right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="refTbody"></tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Expense Name -->
             <div class="form-group">
@@ -567,6 +755,106 @@
     </div><!-- /card -->
 
     <script>
+        // ── Current-month reference data ──────────────────────────────────────────
+        var _refLoaded = false;
+        var _refExpenses = [];
+
+        function toggleRefPanel() {
+            var body    = document.getElementById('refBody');
+            var chevron = document.getElementById('refChevron');
+            var isOpen  = body.classList.contains('open');
+
+            if (isOpen) {
+                body.classList.remove('open');
+                chevron.classList.remove('open');
+            } else {
+                body.classList.add('open');
+                chevron.classList.add('open');
+                if (!_refLoaded) _loadRefData();
+            }
+        }
+
+        function _loadRefData() {
+            google.script.run
+                .withSuccessHandler(function (result) {
+                    _refLoaded = true;
+                    document.getElementById('refLoading').style.display = 'none';
+                    if (!result || !result.success || !result.expenses.length) {
+                        document.getElementById('refLoading').style.display = 'block';
+                        document.getElementById('refLoading').textContent =
+                            result && result.expenses.length === 0 ? 'No expenses found for this month.' : 'Could not load expenses.';
+                        return;
+                    }
+                    _refExpenses = result.expenses;
+                    document.getElementById('refTitle').textContent =
+                        result.month + "'s Expenses";
+                    var count = document.getElementById('refCount');
+                    count.textContent = result.expenses.length;
+                    count.style.display = 'inline-block';
+
+                    var tbody = document.getElementById('refTbody');
+                    tbody.innerHTML = '';
+                    result.expenses.forEach(function (exp) {
+                        var tr = document.createElement('tr');
+                        tr.innerHTML =
+                            '<td>' + _esc(exp.name) + '</td>' +
+                            '<td><span class="ref-type-badge">' + _esc(exp.type) + '</span></td>' +
+                            '<td class="ref-amount" style="text-align:right">' + _esc(exp.amount) + '</td>';
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('refTable').style.display = 'table';
+                })
+                .withFailureHandler(function () {
+                    _refLoaded = false;
+                    document.getElementById('refLoading').textContent = 'Failed to load. Tap again to retry.';
+                })
+                .getCurrentMonthExpenses();
+        }
+
+        function _esc(str) {
+            return String(str)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                .replace(/"/g,'&quot;');
+        }
+
+        // ── Duplicate detection ───────────────────────────────────────────────────
+        var _pendingSubmit = false;
+
+        function _checkDuplicate(name, type) {
+            if (!_refLoaded || !_refExpenses.length) return false;
+            var n = name.toLowerCase().trim();
+            var t = type.toLowerCase().trim();
+            return _refExpenses.some(function (exp) {
+                return exp.name.toLowerCase().trim() === n &&
+                       exp.type.toLowerCase().trim() === t;
+            });
+        }
+
+        function _showDuplicateWarning(name, type) {
+            var box = document.getElementById('alertBox');
+            box.className = 'alert alert-warn';
+            box.innerHTML =
+                '⚠️ <strong>"' + _esc(name) + '"</strong> with category <strong>"' + _esc(type) + '"</strong> already exists this month.<br>' +
+                'Do you want to continue adding a new payment?' +
+                '<div class="warn-actions">' +
+                  '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
+                  '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate()">Yes, Add Anyway</button>' +
+                '</div>';
+            box.style.display = 'block';
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function _cancelDuplicate() {
+            _pendingSubmit = false;
+            clearAlert();
+        }
+
+        function _confirmDuplicate() {
+            _pendingSubmit = true;
+            clearAlert();
+            _doSubmit();
+        }
+
         // ── Mode ─────────────────────────────────────────────────────────────────
         var currentMode = 'ot';
         var modeDescriptions = {
@@ -589,32 +877,46 @@
             if (this.checked) document.getElementById('papToggle').checked = false;
         });
 
-        // ── Submission ────────────────────────────────────────────────────────────
+        // ── Submission ───────────────────────────────────────────────────
         function submitForm() {
             clearAlert();
+            _pendingSubmit = false;
 
-            var name = document.getElementById('expenseName').value.trim();
-            var type = document.getElementById('expenseType').value.trim();
+            var name   = document.getElementById('expenseName').value.trim();
+            var type   = document.getElementById('expenseType').value.trim();
             var amount = document.getElementById('expenseAmount').value;
-            var pap = document.getElementById('papToggle').checked;
-            var split = document.getElementById('splitToggle').checked;
-            var paid = document.getElementById('paidToggle').checked;
-            var period = document.getElementById('expensePeriod').value;
-
-            var paidBySelect = document.getElementById('paidBySelect');
-            var paidByIndex = parseInt(paidBySelect.value) || 0;
-            var paidByName = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
 
             // Client-side validation
             var errors = [];
-            if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
-            if (!type) { errors.push('Category is required.'); markError('expenseType'); }
+            if (!name)   { errors.push('Expense Name is required.'); markError('expenseName'); }
+            if (!type)   { errors.push('Category is required.');     markError('expenseType'); }
             if (amount !== '' && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0)) {
                 errors.push('Amount must be a positive number.');
                 markError('expenseAmount');
             }
-
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
+
+            // Duplicate check (only when reference data has been loaded)
+            if (_checkDuplicate(name, type)) {
+                _showDuplicateWarning(name, type);
+                return;
+            }
+
+            _doSubmit();
+        }
+
+        function _doSubmit() {
+            var name   = document.getElementById('expenseName').value.trim();
+            var type   = document.getElementById('expenseType').value.trim();
+            var amount = document.getElementById('expenseAmount').value;
+            var pap    = document.getElementById('papToggle').checked;
+            var split  = document.getElementById('splitToggle').checked;
+            var paid   = document.getElementById('paidToggle').checked;
+            var period = document.getElementById('expensePeriod').value;
+
+            var paidBySelect = document.getElementById('paidBySelect');
+            var paidByIndex  = parseInt(paidBySelect.value) || 0;
+            var paidByName   = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
 
             setLoading(true);
 
@@ -670,6 +972,9 @@
             document.getElementById('paidToggle').checked = false;
             document.getElementById('expensePeriod').value = '';
             document.getElementById('paidBySelect').value = '0';
+            // Invalidate reference cache so next open shows the newly added expense
+            _refLoaded = false;
+            _refExpenses = [];
         }
     </script>
 </body>

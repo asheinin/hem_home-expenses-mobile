@@ -286,6 +286,52 @@ function autoSwitchToNewYearFile() {
 }
 
 // ============================================================================
+// Current month expense reference (called from client)
+// ============================================================================
+
+/**
+ * Returns all expenses for the current month.
+ * @returns {{success: boolean, expenses: Array<{name:string, type:string, amount:string}>, month: string}}
+ */
+function getCurrentMonthExpenses() {
+    try {
+        var myNumbers = new staticNumbers();
+        var ss = _getSpreadsheet();
+        var date = new Date();
+        var currentMonth = date.getMonth() + 1; // 1-based
+        var sheet = ss.getSheets()[currentMonth]; // sheets[1] = January, etc.
+        var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
+        var values = sheet
+            .getRange(myNumbers.expenseFirstRow, 1, numRows, myNumbers.expenseAmountColumn)
+            .getValues();
+
+        var expenses = [];
+        values.forEach(function (row) {
+            var name   = (row[myNumbers.expenseDescrColumn  - 1] || '').toString().trim();
+            var type   = (row[myNumbers.expenseTypeColumn   - 1] || '').toString().trim();
+            var amount = row[myNumbers.expenseAmountColumn  - 1];
+            if (name) {
+                var amtStr = (amount !== '' && amount !== null && !isNaN(parseFloat(amount)))
+                    ? '$' + parseFloat(amount).toFixed(2)
+                    : '—';
+                expenses.push({ name: name, type: type, amount: amtStr });
+            }
+        });
+
+        // Sort by type, then name
+        expenses.sort(function (a, b) {
+            var t = a.type.localeCompare(b.type);
+            return t !== 0 ? t : a.name.localeCompare(b.name);
+        });
+
+        return { success: true, expenses: expenses, month: _monthName(currentMonth) };
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, expenses: [], month: '', message: err.toString() };
+    }
+}
+
+// ============================================================================
 // Expense form submission (mobile-safe — no getUi() calls)
 // ============================================================================
 
