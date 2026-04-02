@@ -422,37 +422,109 @@
             }
         }
 
-        /* ── Reference Panel ── */
-        .ref-panel {
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 18px;
-            overflow: hidden;
-        }
-
-        .ref-toggle {
+        /* ── 3-dots header menu ── */
+        .header-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 14px;
-            background: #f8f9ff;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .dots-wrap { position: relative; }
+
+        .dots-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.70);
+            font-size: 24px;
+            line-height: 1;
+            padding: 2px 5px;
             cursor: pointer;
-            user-select: none;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            transition: background 0.15s;
-            gap: 8px;
+            transition: color 0.15s;
+            font-family: inherit;
         }
+        .dots-btn:hover { color: white; }
 
-        .ref-toggle:hover {
-            background: #eef0ff;
+        .dots-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.20);
+            min-width: 220px;
+            overflow: hidden;
+            z-index: 200;
         }
+        .dots-menu.open { display: block; }
 
-        .ref-toggle-label {
+        .dots-menu-item {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 10px;
+            padding: 14px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+        }
+        .dots-menu-item:last-child { border-bottom: none; }
+        .dots-menu-item:hover { background: #f0f2ff; }
+
+        /* ── Reference bottom sheet ── */
+        .ref-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.42);
+            z-index: 300;
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+        }
+        .ref-overlay.open { display: block; }
+
+        .ref-sheet {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -6px 40px rgba(0,0,0,0.18);
+            z-index: 400;
+            max-height: 72vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+        }
+        .ref-sheet.open { transform: translateY(0); }
+
+        .ref-sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 2px;
+            margin: 10px auto 0;
+            flex-shrink: 0;
+        }
+
+        .ref-sheet-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px 12px;
+            border-bottom: 1.5px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .ref-sheet-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
             flex: 1;
         }
 
@@ -462,33 +534,33 @@
             background: var(--primary);
             color: white;
             border-radius: 100px;
-            padding: 1px 7px;
+            padding: 2px 8px;
         }
 
-        .ref-chevron {
-            font-size: 16px;
-            transition: transform 0.22s;
+        .ref-close-btn {
+            background: #f0f0f5;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
             color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
+            transition: background 0.15s;
         }
+        .ref-close-btn:hover { background: #dde0ee; }
 
-        .ref-chevron.open {
-            transform: rotate(180deg);
-        }
-
-        .ref-body {
-            display: none;
-            max-height: 280px;
+        .ref-sheet-body {
             overflow-y: auto;
-            border-top: 1.5px solid var(--border);
-        }
-
-        .ref-body.open {
-            display: block;
+            flex: 1;
         }
 
         .ref-loading {
-            padding: 14px;
+            padding: 24px;
             text-align: center;
             font-size: 13px;
             color: var(--muted);
@@ -497,14 +569,14 @@
         .ref-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12.5px;
+            font-size: 13px;
         }
 
         .ref-table thead th {
             position: sticky;
             top: 0;
             background: #f0f2ff;
-            padding: 7px 12px;
+            padding: 8px 14px;
             text-align: left;
             font-size: 10px;
             font-weight: 700;
@@ -518,17 +590,11 @@
             border-bottom: 1px solid #f0f0f0;
             transition: background 0.12s;
         }
-
-        .ref-table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .ref-table tbody tr:hover {
-            background: #f8f9ff;
-        }
+        .ref-table tbody tr:last-child { border-bottom: none; }
+        .ref-table tbody tr:hover { background: #f8f9ff; }
 
         .ref-table td {
-            padding: 8px 12px;
+            padding: 10px 14px;
             color: var(--text);
             vertical-align: middle;
         }
@@ -541,10 +607,10 @@
 
         .ref-type-badge {
             display: inline-block;
-            background: rgba(102, 126, 234, 0.10);
+            background: rgba(102,126,234,0.10);
             color: var(--primary-dark);
             border-radius: 6px;
-            padding: 1px 6px;
+            padding: 2px 7px;
             font-size: 11px;
             font-weight: 600;
         }
@@ -595,8 +661,16 @@
         <div class="card-header">
             <div class="card-header-top">
                 <h1>💸 Add Expense</h1>
-                <a class="settings-link" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
-                    title="Settings">⚙️</a>
+                <div class="header-actions">
+                    <a class="settings-link" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
+                        title="Settings">⚙️</a>
+                    <div class="dots-wrap" id="dotsWrap">
+                        <button class="dots-btn" id="dotsBtn" onclick="toggleDotsMenu(event)" title="More options">⋮</button>
+                        <div class="dots-menu" id="dotsMenu">
+                            <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="chip-container">
                 <? if (spreadsheetName) { ?>
@@ -630,29 +704,6 @@
 
             <div id="alertBox" class="alert"></div>
 
-            <!-- Current-month reference accordion -->
-            <div class="ref-panel" id="refPanel">
-                <div class="ref-toggle" id="refToggle" onclick="toggleRefPanel()">
-                    <span class="ref-toggle-label">
-                        📋 <span id="refTitle">This Month's Expenses</span>
-                        <span class="ref-count" id="refCount" style="display:none">0</span>
-                    </span>
-                    <span class="ref-chevron" id="refChevron">▾</span>
-                </div>
-                <div class="ref-body" id="refBody">
-                    <div class="ref-loading" id="refLoading">Loading…</div>
-                    <table class="ref-table" id="refTable" style="display:none">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th style="text-align:right">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="refTbody"></tbody>
-                    </table>
-                </div>
-            </div>
 
             <!-- Expense Name -->
             <div class="form-group">
@@ -754,24 +805,55 @@
         </div><!-- /card-body -->
     </div><!-- /card -->
 
+    <!-- Reference bottom sheet -->
+    <div class="ref-overlay" id="refOverlay" onclick="closeRefModal()"></div>
+    <div class="ref-sheet" id="refSheet">
+        <div class="ref-sheet-handle"></div>
+        <div class="ref-sheet-header">
+            <span class="ref-sheet-title" id="refTitle">This Month's Expenses</span>
+            <span class="ref-count" id="refCount" style="display:none">0</span>
+            <button class="ref-close-btn" onclick="closeRefModal()">✕</button>
+        </div>
+        <div class="ref-sheet-body">
+            <div class="ref-loading" id="refLoading">Loading…</div>
+            <table class="ref-table" id="refTable" style="display:none">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th style="text-align:right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="refTbody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <script>
         // ── Current-month reference data ──────────────────────────────────────────
         var _refLoaded = false;
         var _refExpenses = [];
 
-        function toggleRefPanel() {
-            var body    = document.getElementById('refBody');
-            var chevron = document.getElementById('refChevron');
-            var isOpen  = body.classList.contains('open');
+        function toggleDotsMenu(e) {
+            e.stopPropagation();
+            document.getElementById('dotsMenu').classList.toggle('open');
+        }
 
-            if (isOpen) {
-                body.classList.remove('open');
-                chevron.classList.remove('open');
-            } else {
-                body.classList.add('open');
-                chevron.classList.add('open');
-                if (!_refLoaded) _loadRefData();
-            }
+        // Close dropdown when tapping anywhere else
+        document.addEventListener('click', function () {
+            document.getElementById('dotsMenu').classList.remove('open');
+        });
+
+        function openRefModal() {
+            document.getElementById('dotsMenu').classList.remove('open');
+            document.getElementById('refOverlay').classList.add('open');
+            document.getElementById('refSheet').classList.add('open');
+            if (!_refLoaded) _loadRefData();
+        }
+
+        function closeRefModal() {
+            document.getElementById('refOverlay').classList.remove('open');
+            document.getElementById('refSheet').classList.remove('open');
         }
 
         function _loadRefData() {
