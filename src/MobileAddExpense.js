@@ -103,7 +103,7 @@ function _serveMain() {
         return errTemplate
             .evaluate()
             .setTitle('Add Expense · Home Expenses')
-            .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+            .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no')
             .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
 
@@ -142,7 +142,7 @@ function _serveMain() {
     return template
         .evaluate()
         .setTitle('Add Expense · Home Expenses')
-        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
@@ -168,7 +168,7 @@ function _serveSettings() {
     return template
         .evaluate()
         .setTitle('Settings · Home Expenses Mobile')
-        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
