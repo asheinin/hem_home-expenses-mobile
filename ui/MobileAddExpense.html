@@ -15,9 +15,11 @@
     <meta name="theme-color" content="#667eea">
 
     <!-- App Icons (Placeholders — see Walkthrough for setup) -->
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/667eea/ffffff?text=HE">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://via.placeholder.com/32/667eea/ffffff?text=HE">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://via.placeholder.com/16/667eea/ffffff?text=HE">
+    <link rel="apple-touch-icon" href="https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
 
     <script>var SETTINGS_URL = '<?= ScriptApp.getService().getUrl() ?>?page=settings';</script>
     <style>
@@ -430,12 +432,14 @@
             flex-shrink: 0;
         }
 
-        .dots-wrap { position: relative; }
+        .dots-wrap {
+            position: relative;
+        }
 
         .dots-btn {
             background: none;
             border: none;
-            color: rgba(255,255,255,0.70);
+            color: rgba(255, 255, 255, 0.70);
             font-size: 24px;
             line-height: 1;
             padding: 2px 5px;
@@ -443,7 +447,10 @@
             transition: color 0.15s;
             font-family: inherit;
         }
-        .dots-btn:hover { color: white; }
+
+        .dots-btn:hover {
+            color: white;
+        }
 
         .dots-menu {
             display: none;
@@ -452,12 +459,15 @@
             right: 0;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.20);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.20);
             min-width: 220px;
             overflow: hidden;
             z-index: 200;
         }
-        .dots-menu.open { display: block; }
+
+        .dots-menu.open {
+            display: block;
+        }
 
         .dots-menu-item {
             display: flex;
@@ -471,20 +481,29 @@
             border-bottom: 1px solid var(--border);
             transition: background 0.12s;
         }
-        .dots-menu-item:last-child { border-bottom: none; }
-        .dots-menu-item:hover { background: #f0f2ff; }
+
+        .dots-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .dots-menu-item:hover {
+            background: #f0f2ff;
+        }
 
         /* ── Reference bottom sheet ── */
         .ref-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.42);
+            background: rgba(0, 0, 0, 0.42);
             z-index: 300;
             -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
         }
-        .ref-overlay.open { display: block; }
+
+        .ref-overlay.open {
+            display: block;
+        }
 
         .ref-sheet {
             position: fixed;
@@ -493,15 +512,18 @@
             bottom: 0;
             background: white;
             border-radius: 20px 20px 0 0;
-            box-shadow: 0 -6px 40px rgba(0,0,0,0.18);
+            box-shadow: 0 -6px 40px rgba(0, 0, 0, 0.18);
             z-index: 400;
             max-height: 72vh;
             display: flex;
             flex-direction: column;
             transform: translateY(100%);
-            transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+            transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
         }
-        .ref-sheet.open { transform: translateY(0); }
+
+        .ref-sheet.open {
+            transform: translateY(0);
+        }
 
         .ref-sheet-handle {
             width: 36px;
@@ -552,7 +574,10 @@
             flex-shrink: 0;
             transition: background 0.15s;
         }
-        .ref-close-btn:hover { background: #dde0ee; }
+
+        .ref-close-btn:hover {
+            background: #dde0ee;
+        }
 
         .ref-sheet-body {
             overflow-y: auto;
@@ -590,8 +615,14 @@
             border-bottom: 1px solid #f0f0f0;
             transition: background 0.12s;
         }
-        .ref-table tbody tr:last-child { border-bottom: none; }
-        .ref-table tbody tr:hover { background: #f8f9ff; }
+
+        .ref-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .ref-table tbody tr:hover {
+            background: #f8f9ff;
+        }
 
         .ref-table td {
             padding: 10px 14px;
@@ -607,7 +638,7 @@
 
         .ref-type-badge {
             display: inline-block;
-            background: rgba(102,126,234,0.10);
+            background: rgba(102, 126, 234, 0.10);
             color: var(--primary-dark);
             border-radius: 6px;
             padding: 2px 7px;
@@ -650,7 +681,9 @@
             color: white;
         }
 
-        .btn-warn:active { opacity: 0.75; }
+        .btn-warn:active {
+            opacity: 0.75;
+        }
     </style>
 </head>
 
@@ -665,7 +698,8 @@
                     <a class="settings-link" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
                         title="Settings">⚙️</a>
                     <div class="dots-wrap" id="dotsWrap">
-                        <button class="dots-btn" id="dotsBtn" onclick="toggleDotsMenu(event)" title="More options">⋮</button>
+                        <button class="dots-btn" id="dotsBtn" onclick="toggleDotsMenu(event)"
+                            title="More options">⋮</button>
                         <div class="dots-menu" id="dotsMenu">
                             <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
                         </div>
@@ -895,8 +929,8 @@
 
         function _esc(str) {
             return String(str)
-                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                .replace(/"/g,'&quot;');
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
         // ── Duplicate detection ───────────────────────────────────────────────────
@@ -908,7 +942,7 @@
             var t = type.toLowerCase().trim();
             return _refExpenses.some(function (exp) {
                 return exp.name.toLowerCase().trim() === n &&
-                       exp.type.toLowerCase().trim() === t;
+                    exp.type.toLowerCase().trim() === t;
             });
         }
 
@@ -919,8 +953,8 @@
                 '⚠️ <strong>"' + _esc(name) + '"</strong> with category <strong>"' + _esc(type) + '"</strong> already exists this month.<br>' +
                 'Do you want to continue adding a new payment?' +
                 '<div class="warn-actions">' +
-                  '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
-                  '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate()">Yes, Add Anyway</button>' +
+                '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
+                '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate()">Yes, Add Anyway</button>' +
                 '</div>';
             box.style.display = 'block';
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -964,14 +998,14 @@
             clearAlert();
             _pendingSubmit = false;
 
-            var name   = document.getElementById('expenseName').value.trim();
-            var type   = document.getElementById('expenseType').value.trim();
+            var name = document.getElementById('expenseName').value.trim();
+            var type = document.getElementById('expenseType').value.trim();
             var amount = document.getElementById('expenseAmount').value;
 
             // Client-side validation
             var errors = [];
-            if (!name)   { errors.push('Expense Name is required.'); markError('expenseName'); }
-            if (!type)   { errors.push('Category is required.');     markError('expenseType'); }
+            if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
+            if (!type) { errors.push('Category is required.'); markError('expenseType'); }
             if (amount !== '' && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0)) {
                 errors.push('Amount must be a positive number.');
                 markError('expenseAmount');
@@ -988,17 +1022,17 @@
         }
 
         function _doSubmit() {
-            var name   = document.getElementById('expenseName').value.trim();
-            var type   = document.getElementById('expenseType').value.trim();
+            var name = document.getElementById('expenseName').value.trim();
+            var type = document.getElementById('expenseType').value.trim();
             var amount = document.getElementById('expenseAmount').value;
-            var pap    = document.getElementById('papToggle').checked;
-            var split  = document.getElementById('splitToggle').checked;
-            var paid   = document.getElementById('paidToggle').checked;
+            var pap = document.getElementById('papToggle').checked;
+            var split = document.getElementById('splitToggle').checked;
+            var paid = document.getElementById('paidToggle').checked;
             var period = document.getElementById('expensePeriod').value;
 
             var paidBySelect = document.getElementById('paidBySelect');
-            var paidByIndex  = parseInt(paidBySelect.value) || 0;
-            var paidByName   = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
+            var paidByIndex = parseInt(paidBySelect.value) || 0;
+            var paidByName = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
 
             setLoading(true);
 
