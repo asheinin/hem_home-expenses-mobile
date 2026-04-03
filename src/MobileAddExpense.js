@@ -360,7 +360,8 @@ function mobileProcessForm(
     split,
     paid,
     paidByName,
-    paidByIndex
+    paidByIndex,
+    actionType
 ) {
     try {
         var myNumbers = new staticNumbers();
@@ -394,24 +395,73 @@ function mobileProcessForm(
                 .getRange(myNumbers.expenseFirstRow, myNumbers.expenseDescrColumn, numOfRows)
                 .getValues()
                 .flat();
+            
+            var types = sheet
+                .getRange(myNumbers.expenseFirstRow, myNumbers.expenseTypeColumn, numOfRows)
+                .getValues()
+                .flat();
 
-            var existingIndex = descriptions.indexOf(newExpenseItem);
+            var existingIndex = -1;
+
+            if (actionType !== '_add_new') {
+                if (actionType === '_update') {
+                    for (var k = 0; k < descriptions.length; k++) {
+                        var dStr = (descriptions[k] || '').toString().trim().toLowerCase();
+                        var tStr = (types[k] || '').toString().trim().toLowerCase();
+                        if (dStr === newExpenseItem.toLowerCase().trim() && tStr === newExpenseType.toLowerCase().trim()) {
+                            existingIndex = k;
+                            break;
+                        }
+                    }
+                } else {
+                    for (var k = 0; k < descriptions.length; k++) {
+                        var dStr = (descriptions[k] || '').toString().trim().toLowerCase();
+                        if (dStr === newExpenseItem.toLowerCase().trim()) {
+                            existingIndex = k;
+                            break;
+                        }
+                    }
+                }
+            }
 
             if (existingIndex !== -1) {
                 var row = existingIndex + myNumbers.expenseFirstRow;
-                sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
 
-                if (amount !== -1) {
-                    sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(amount);
-                    if (paidByIndex == 1) sheet.getRange(row, myNumbers.expenseSecondPayColumn).setValue(amount);
-                    if (paidByIndex == 2) sheet.getRange(row, myNumbers.expenseFirstPayColumn).setValue(amount);
+                if (actionType === '_update') {
+                    var currentAmt = sheet.getRange(row, myNumbers.expenseAmountColumn).getValue();
+                    var newTotal = (parseFloat(currentAmt) || 0) + (amount !== -1 ? amount : 0);
+                    sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(newTotal);
+
+                    if (amount !== -1) {
+                        if (paidByIndex == 1) { // Spouse 2 (dashSpouse1NameColumn refers to column 2 in myNumbers, or the first option)
+                            var p1 = sheet.getRange(row, myNumbers.expenseSecondPayColumn).getValue();
+                            sheet.getRange(row, myNumbers.expenseSecondPayColumn).setValue((parseFloat(p1) || 0) + amount);
+                        } else if (paidByIndex == 2) { // Spouse 1
+                            var p2 = sheet.getRange(row, myNumbers.expenseFirstPayColumn).getValue();
+                            sheet.getRange(row, myNumbers.expenseFirstPayColumn).setValue((parseFloat(p2) || 0) + amount);
+                        }
+                    }
+
+                    sheet.getRange(row, myNumbers.expensePAPColumn).setValue(pap ? 'PAP' : '');
+                    sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
+                    sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
+                    sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                
+                } else {
+                    sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
+
+                    if (amount !== -1) {
+                        sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(amount);
+                        if (paidByIndex == 1) sheet.getRange(row, myNumbers.expenseSecondPayColumn).setValue(amount);
+                        if (paidByIndex == 2) sheet.getRange(row, myNumbers.expenseFirstPayColumn).setValue(amount);
+                    }
+
+                    sheet.getRange(row, myNumbers.expenseTypeColumn).setValue(newExpenseType);
+                    sheet.getRange(row, myNumbers.expensePAPColumn).setValue(pap ? 'PAP' : '');
+                    sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
+                    sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
+                    sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
                 }
-
-                sheet.getRange(row, myNumbers.expenseTypeColumn).setValue(newExpenseType);
-                sheet.getRange(row, myNumbers.expensePAPColumn).setValue(pap ? 'PAP' : '');
-                sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
-                sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
-                sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
 
             } else {
                 var expenseData = sheet

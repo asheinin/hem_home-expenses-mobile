@@ -946,26 +946,31 @@
             });
         }
 
+        var _dupAction = '';
+
         function _showDuplicateWarning(name, type) {
             var box = document.getElementById('alertBox');
             box.className = 'alert alert-warn';
             box.innerHTML =
                 '⚠️ <strong>"' + _esc(name) + '"</strong> with category <strong>"' + _esc(type) + '"</strong> already exists this month.<br>' +
-                'Do you want to continue adding a new payment?' +
-                '<div class="warn-actions">' +
+                'How would you like to proceed?' +
+                '<div class="warn-actions" style="flex-wrap: wrap; gap: 8px;">' +
                 '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
-                '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate()">Yes, Add Anyway</button>' +
+                '<button class="btn-warn btn-warn-continue" style="background:#4b5563; color:white; flex-basis: 45%;" onclick="_confirmDuplicate(\'_add_new\')">Add as New</button>' +
+                '<button class="btn-warn btn-warn-continue" style="flex-basis: 45%;" onclick="_confirmDuplicate(\'_update\')">Update Existing</button>' +
                 '</div>';
             box.style.display = 'block';
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function _cancelDuplicate() {
+            _dupAction = '';
             _pendingSubmit = false;
             clearAlert();
         }
 
-        function _confirmDuplicate() {
+        function _confirmDuplicate(action) {
+            _dupAction = action;
             _pendingSubmit = true;
             clearAlert();
             _doSubmit();
@@ -1034,6 +1039,8 @@
             var paidByIndex = parseInt(paidBySelect.value) || 0;
             var paidByName = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
 
+            var actionType = _dupAction || '';
+
             setLoading(true);
 
             google.script.run
@@ -1050,7 +1057,7 @@
                     setLoading(false);
                     showAlert('❌ Server error: ' + err.message, 'error');
                 })
-                .mobileProcessForm(name, type, amount, pap, period, currentMode, split, paid, paidByName, paidByIndex);
+                .mobileProcessForm(name, type, amount, pap, period, currentMode, split, paid, paidByName, paidByIndex, actionType);
         }
 
         // ── UI helpers ────────────────────────────────────────────────────────────
@@ -1088,6 +1095,7 @@
             document.getElementById('paidToggle').checked = false;
             document.getElementById('expensePeriod').value = '';
             document.getElementById('paidBySelect').value = '0';
+            _dupAction = '';
             // Invalidate reference cache so next open shows the newly added expense
             _refLoaded = false;
             _refExpenses = [];
