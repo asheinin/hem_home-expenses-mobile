@@ -1128,6 +1128,19 @@
             _loadRefData(); // Re-fetch baseline info automatically
         }
 
+        // Auto-fill category when typing/selecting a matching name
+        document.getElementById('expenseName').addEventListener('input', function() {
+            var selectedName = this.value.trim().toLowerCase();
+            if (!selectedName || !_refExpenses || !_refExpenses.length) return;
+            
+            for (var i = 0; i < _refExpenses.length; i++) {
+                if (_refExpenses[i].name.trim().toLowerCase() === selectedName) {
+                    document.getElementById('expenseType').value = _refExpenses[i].type;
+                    break;
+                }
+            }
+        });
+
         // Auto-load reference baseline instantly on page load
         _loadRefData();
     </script>
