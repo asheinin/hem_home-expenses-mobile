@@ -798,23 +798,18 @@
                 <label class="field-label" for="expenseType">
                     Category <span class="required">*</span>
                 </label>
-                <div class="ac-container">
-                    <input type="text" id="expenseType" placeholder="Select or type new category" autocomplete="off">
-                    <div class="ac-dropdown" id="expenseTypeDropdown"></div>
-                </div>
+                <input type="text" id="expenseType" list="typeChoices" placeholder="Select or type new category" autocomplete="off">
+                <datalist id="typeChoices">
+                    <? for (var i = 0; i < expenseTypes.length; i++) { ?>
+                    <option value="<?= expenseTypes[i] ?>"></option>
+                    <? } ?>
+                </datalist>
             </div>
 
             <!-- Initialize JS arrays from server data -->
             <script>
-                var _serverExpenseNames = [];
-                var _serverExpenseTypes = [];
-                var _nameCategoryMap = <?= JSON.stringify(nameCategoryMap) ?>;
-                <? for (var i = 0; i < expenseNames.length; i++) { ?>
-                    _serverExpenseNames.push(<?= JSON.stringify(expenseNames[i]) ?>);
-                <? } ?>
-                <? for (var i = 0; i < expenseTypes.length; i++) { ?>
-                    _serverExpenseTypes.push(<?= JSON.stringify(expenseTypes[i]) ?>);
-                <? } ?>
+                var _serverExpenseNames = <?!= JSON.stringify(expenseNames) ?>;
+                var _nameCategoryMap = <?!= JSON.stringify(nameCategoryMap) ?>;
             </script>
 
             <!-- Amount -->
@@ -1183,7 +1178,7 @@
         _loadRefData();
 
         // ── Custom Autocomplete Logic ──
-        function setupAutocomplete(inputId, dropdownId, sourceArray, isNameField) {
+        function setupAutocomplete(inputId, dropdownId, sourceArray) {
             var input = document.getElementById(inputId);
             var dropdown = document.getElementById(dropdownId);
             var activeTimeout;
@@ -1211,7 +1206,7 @@
                             dropdown.classList.remove('open');
                             
                             // Auto-populate Category if they clicked a Name
-                            if (isNameField && _nameCategoryMap[item.toLowerCase()]) {
+                            if (_nameCategoryMap[item.toLowerCase()]) {
                                 document.getElementById('expenseType').value = _nameCategoryMap[item.toLowerCase()];
                             }
                         });
@@ -1235,7 +1230,7 @@
                 renderOptions(val);
                 
                 // Same auto-fill logic if they type the full name naturally
-                if (isNameField && _nameCategoryMap[val.toLowerCase().trim()]) {
+                if (_nameCategoryMap[val.toLowerCase().trim()]) {
                     document.getElementById('expenseType').value = _nameCategoryMap[val.toLowerCase().trim()];
                 }
             });
@@ -1252,14 +1247,12 @@
             });
         }
 
-        setupAutocomplete('expenseName', 'expenseNameDropdown', _serverExpenseNames, true);
-        setupAutocomplete('expenseType', 'expenseTypeDropdown', _serverExpenseTypes, false);
+        setupAutocomplete('expenseName', 'expenseNameDropdown', _serverExpenseNames);
 
         // Hide autocomplete when tapping outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.ac-container')) {
                 document.getElementById('expenseNameDropdown').classList.remove('open');
-                document.getElementById('expenseTypeDropdown').classList.remove('open');
             }
         });
     </script>
