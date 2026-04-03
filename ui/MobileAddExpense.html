@@ -684,6 +684,49 @@
         .btn-warn:active {
             opacity: 0.75;
         }
+
+        /* ── Custom Autocomplete (Cross-device safe) ── */
+        .ac-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .ac-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 50;
+            display: none;
+        }
+
+        .ac-dropdown.open {
+            display: block;
+        }
+
+        .ac-item {
+            padding: 12px 14px;
+            font-size: 15px;
+            color: var(--text);
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f5;
+            transition: background 0.15s;
+        }
+
+        .ac-item:last-child {
+            border-bottom: none;
+        }
+
+        .ac-item:hover, .ac-item:active {
+            background: #f8f9ff;
+            color: var(--primary-dark);
+        }
     </style>
 </head>
 
@@ -744,27 +787,34 @@
                 <label class="field-label" for="expenseName">
                     Expense Name <span class="required">*</span>
                 </label>
-                <input type="text" id="expenseName" list="nameChoices" placeholder="e.g. Home Insurance">
-                <datalist id="nameChoices">
-                    <? for (var i = 0; i < expenseNames.length; i++) { ?>
-                    <option value="<?= expenseNames[i] ?>"></option>
-                    <? } ?>
-                </datalist>
+                <div class="ac-container">
+                    <input type="text" id="expenseName" placeholder="e.g. Home Insurance" autocomplete="off">
+                    <div class="ac-dropdown" id="expenseNameDropdown"></div>
+                </div>
             </div>
 
-            <!-- Category (datalist = autocomplete + allows new values) -->
+            <!-- Category -->
             <div class="form-group">
                 <label class="field-label" for="expenseType">
                     Category <span class="required">*</span>
                 </label>
-                <input type="text" id="expenseType" list="typeChoices" placeholder="Select or type new category"
-                    autocomplete="off">
-                <datalist id="typeChoices">
-                    <? for (var i = 0; i < expenseTypes.length; i++) { ?>
-                    <option value="<?= expenseTypes[i] ?>">
-                        <? } ?>
-                </datalist>
+                <div class="ac-container">
+                    <input type="text" id="expenseType" placeholder="Select or type new category" autocomplete="off">
+                    <div class="ac-dropdown" id="expenseTypeDropdown"></div>
+                </div>
             </div>
+
+            <!-- Initialize JS arrays from server data -->
+            <script>
+                var _serverExpenseNames = [];
+                var _serverExpenseTypes = [];
+                <? for (var i = 0; i < expenseNames.length; i++) { ?>
+                    _serverExpenseNames.push(<?= JSON.stringify(expenseNames[i]) ?>);
+                <? } ?>
+                <? for (var i = 0; i < expenseTypes.length; i++) { ?>
+                    _serverExpenseTypes.push(<?= JSON.stringify(expenseTypes[i]) ?>);
+                <? } ?>
+            </script>
 
             <!-- Amount -->
             <div class="form-group">
@@ -1128,21 +1178,100 @@
             _loadRefData(); // Re-fetch baseline info automatically
         }
 
-        // Auto-fill category when typing/selecting a matching name
-        document.getElementById('expenseName').addEventListener('input', function() {
-            var selectedName = this.value.trim().toLowerCase();
-            if (!selectedName || !_refExpenses || !_refExpenses.length) return;
-            
-            for (var i = 0; i < _refExpenses.length; i++) {
-                if (_refExpenses[i].name.trim().toLowerCase() === selectedName) {
-                    document.getElementById('expenseType').value = _refExpenses[i].type;
-                    break;
-                }
-            }
-        });
-
         // Auto-load reference baseline instantly on page load
         _loadRefData();
+
+        // ── Custom Autocomplete Logic ──
+        function setupAutocomplete(inputId, dropdownId, sourceArray, isNameField) {
+            var input = document.getElementById(inputId);
+            var dropdown = document.getElementById(dropdownId);
+            var activeTimeout;
+
+            function renderOptions(query) {
+                var q = query.toLowerCase().trim();
+                dropdown.innerHTML = '';
+                var matches = 0;
+                
+                sourceArray.forEach(function(item) {
+                    if (item.toLowerCase().indexOf(q) !== -1) {
+                        matches++;
+                        var div = document.createElement('div');
+                        div.className = 'ac-item';
+                        div.textContent = item;
+                        
+                        // Handle mousedown to prevent input blur hiding it before click registers
+                        div.addEventListener('mousedown', function(e) {
+                            e.preventDefault();
+                        });
+                        
+                        div.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            input.value = item;
+                            dropdown.classList.remove('open');
+                            
+                            // Auto-populate Category if they clicked a Name
+                            if (isNameField && _refExpenses && _refExpenses.length) {
+                                for (var i = 0; i < _refExpenses.length; i++) {
+                                    if (_refExpenses[i].name.trim().toLowerCase() === item.toLowerCase()) {
+                                        document.getElementById('expenseType').value = _refExpenses[i].type;
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                        dropdown.appendChild(div);
+                    }
+                });
+
+                if (matches > 0) {
+                    dropdown.classList.add('open');
+                } else {
+                    dropdown.classList.remove('open');
+                }
+            }
+
+            input.addEventListener('input', function() {
+                var val = this.value;
+                if (!val) {
+                    dropdown.classList.remove('open');
+                    return;
+                }
+                renderOptions(val);
+                
+                // Same auto-fill logic if they type the full name naturally
+                if (isNameField && _refExpenses && _refExpenses.length) {
+                    var lower = val.toLowerCase().trim();
+                    for (var i = 0; i < _refExpenses.length; i++) {
+                        if (_refExpenses[i].name.trim().toLowerCase() === lower) {
+                            document.getElementById('expenseType').value = _refExpenses[i].type;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                if (this.value.trim()) renderOptions(this.value);
+            });
+
+            input.addEventListener('blur', function() {
+                // Delay so click on dropdown registers
+                activeTimeout = setTimeout(function() {
+                    dropdown.classList.remove('open');
+                }, 150);
+            });
+        }
+
+        setupAutocomplete('expenseName', 'expenseNameDropdown', _serverExpenseNames, true);
+        setupAutocomplete('expenseType', 'expenseTypeDropdown', _serverExpenseTypes, false);
+
+        // Hide autocomplete when tapping outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.ac-container')) {
+                document.getElementById('expenseNameDropdown').classList.remove('open');
+                document.getElementById('expenseTypeDropdown').classList.remove('open');
+            }
+        });
     </script>
 </body>
 
