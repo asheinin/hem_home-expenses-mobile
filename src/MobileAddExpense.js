@@ -112,6 +112,7 @@ function _serveMain() {
     var expenseNames = new Set();
     var expenseTypes = new Set();
     var expensePeriods = new Set();
+    var nameCategoryMap = {};
     
     var currentMonthIdx = new Date().getMonth() + 1;
 
@@ -126,7 +127,17 @@ function _serveMain() {
             var n = row[myNumbers.expenseDescrColumn - 1];
             var t = row[myNumbers.expenseTypeColumn - 1];
             var p = row[myNumbers.expencePeriodColumn - 1];
-            if (n && i === currentMonthIdx) expenseNames.add(n.toString().trim());
+            
+            if (n && i === currentMonthIdx) {
+                var nStr = n.toString().trim();
+                expenseNames.add(nStr);
+                
+                // Store fastest category mapping for synchronous client resolution
+                var tStr = t ? t.toString().trim() : '';
+                if (tStr && !nameCategoryMap[nStr.toLowerCase()]) {
+                    nameCategoryMap[nStr.toLowerCase()] = tStr;
+                }
+            }
             if (t) expenseTypes.add(t.toString().trim());
             if (p) expensePeriods.add(p.toString().trim());
         });
@@ -144,6 +155,7 @@ function _serveMain() {
         return a.toLowerCase().localeCompare(b.toLowerCase());
     });
     template.expensePeriods = Array.from(expensePeriods).sort();
+    template.nameCategoryMap = nameCategoryMap;
     template.spouseNames = [spouse1, spouse2].filter(Boolean);
     var now = new Date();
     template.currentDateStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "MMMM dd, yyyy");

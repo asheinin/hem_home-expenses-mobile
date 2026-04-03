@@ -808,6 +808,7 @@
             <script>
                 var _serverExpenseNames = [];
                 var _serverExpenseTypes = [];
+                var _nameCategoryMap = <?= JSON.stringify(nameCategoryMap) ?>;
                 <? for (var i = 0; i < expenseNames.length; i++) { ?>
                     _serverExpenseNames.push(<?= JSON.stringify(expenseNames[i]) ?>);
                 <? } ?>
@@ -1210,13 +1211,8 @@
                             dropdown.classList.remove('open');
                             
                             // Auto-populate Category if they clicked a Name
-                            if (isNameField && _refExpenses && _refExpenses.length) {
-                                for (var i = 0; i < _refExpenses.length; i++) {
-                                    if (_refExpenses[i].name.trim().toLowerCase() === item.toLowerCase()) {
-                                        document.getElementById('expenseType').value = _refExpenses[i].type;
-                                        break;
-                                    }
-                                }
+                            if (isNameField && _nameCategoryMap[item.toLowerCase()]) {
+                                document.getElementById('expenseType').value = _nameCategoryMap[item.toLowerCase()];
                             }
                         });
                         dropdown.appendChild(div);
@@ -1239,14 +1235,8 @@
                 renderOptions(val);
                 
                 // Same auto-fill logic if they type the full name naturally
-                if (isNameField && _refExpenses && _refExpenses.length) {
-                    var lower = val.toLowerCase().trim();
-                    for (var i = 0; i < _refExpenses.length; i++) {
-                        if (_refExpenses[i].name.trim().toLowerCase() === lower) {
-                            document.getElementById('expenseType').value = _refExpenses[i].type;
-                            break;
-                        }
-                    }
+                if (isNameField && _nameCategoryMap[val.toLowerCase().trim()]) {
+                    document.getElementById('expenseType').value = _nameCategoryMap[val.toLowerCase().trim()];
                 }
             });
 
