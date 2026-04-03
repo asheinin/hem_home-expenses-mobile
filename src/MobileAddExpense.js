@@ -108,6 +108,7 @@ function _serveMain() {
     }
 
     var sheets = ss.getSheets();
+    var expenseNames = new Set();
     var expenseTypes = new Set();
     var expensePeriods = new Set();
 
@@ -119,8 +120,10 @@ function _serveMain() {
             .getValues();
 
         values.forEach(function (row) {
+            var n = row[myNumbers.expenseDescrColumn - 1];
             var t = row[myNumbers.expenseTypeColumn - 1];
             var p = row[myNumbers.expencePeriodColumn - 1];
+            if (n) expenseNames.add(n.toString().trim());
             if (t) expenseTypes.add(t.toString().trim());
             if (p) expensePeriods.add(p.toString().trim());
         });
@@ -131,7 +134,12 @@ function _serveMain() {
     var spouse2 = dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse2NameColumn).getValue();
 
     var template = HtmlService.createTemplateFromFile('ui/MobileAddExpense');
-    template.expenseTypes = Array.from(expenseTypes).sort();
+    template.expenseNames = Array.from(expenseNames).sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+    template.expenseTypes = Array.from(expenseTypes).sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
     template.expensePeriods = Array.from(expensePeriods).sort();
     template.spouseNames = [spouse1, spouse2].filter(Boolean);
     var now = new Date();

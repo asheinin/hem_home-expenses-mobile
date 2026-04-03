@@ -744,7 +744,12 @@
                 <label class="field-label" for="expenseName">
                     Expense Name <span class="required">*</span>
                 </label>
-                <input type="text" id="expenseName" placeholder="e.g. Home Insurance" autocomplete="off">
+                <input type="text" id="expenseName" list="nameChoices" placeholder="e.g. Home Insurance" autocomplete="off">
+                <datalist id="nameChoices">
+                    <? for (var i = 0; i < expenseNames.length; i++) { ?>
+                    <option value="<?= expenseNames[i] ?>">
+                    <? } ?>
+                </datalist>
             </div>
 
             <!-- Category (datalist = autocomplete + allows new values) -->
