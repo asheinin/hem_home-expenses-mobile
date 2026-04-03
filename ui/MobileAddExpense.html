@@ -744,10 +744,10 @@
                 <label class="field-label" for="expenseName">
                     Expense Name <span class="required">*</span>
                 </label>
-                <input type="text" id="expenseName" list="nameChoices" placeholder="e.g. Home Insurance" autocomplete="off">
+                <input type="text" id="expenseName" list="nameChoices" placeholder="e.g. Home Insurance">
                 <datalist id="nameChoices">
                     <? for (var i = 0; i < expenseNames.length; i++) { ?>
-                    <option value="<?= expenseNames[i] ?>">
+                    <option value="<?= expenseNames[i] ?>"></option>
                     <? } ?>
                 </datalist>
             </div>
@@ -1022,7 +1022,29 @@
             }
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
 
-            // Duplicate check (only when reference data has been loaded)
+            // Duplicate check (synchronously if already loaded, async fallback if not)
+            if (!_refLoaded) {
+                setLoading(true);
+                google.script.run
+                    .withSuccessHandler(function (result) {
+                        _refLoaded = true;
+                        if (result && result.success) _refExpenses = result.expenses;
+                        
+                        if (_checkDuplicate(name, type)) {
+                            setLoading(false);
+                            _showDuplicateWarning(name, type);
+                        } else {
+                            _doSubmit();
+                        }
+                    })
+                    .withFailureHandler(function () {
+                        // Fallback to submitting anyway if load fails
+                        _doSubmit();
+                    })
+                    .getCurrentMonthExpenses();
+                return;
+            }
+
             if (_checkDuplicate(name, type)) {
                 _showDuplicateWarning(name, type);
                 return;
@@ -1101,10 +1123,13 @@
             document.getElementById('expensePeriod').value = '';
             document.getElementById('paidBySelect').value = '0';
             _dupAction = '';
-            // Invalidate reference cache so next open shows the newly added expense
             _refLoaded = false;
             _refExpenses = [];
+            _loadRefData(); // Re-fetch baseline info automatically
         }
+
+        // Auto-load reference baseline instantly on page load
+        _loadRefData();
     </script>
 </body>
 

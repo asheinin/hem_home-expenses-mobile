@@ -96,6 +96,7 @@ function _serveMain() {
     } catch (err) {
         // Spreadsheet not configured yet — redirect to settings
         var errTemplate = HtmlService.createTemplateFromFile('ui/MobileAddExpense');
+        errTemplate.expenseNames = [];
         errTemplate.expenseTypes = [];
         errTemplate.expensePeriods = [];
         errTemplate.spouseNames = [];
@@ -111,6 +112,8 @@ function _serveMain() {
     var expenseNames = new Set();
     var expenseTypes = new Set();
     var expensePeriods = new Set();
+    
+    var currentMonthIdx = new Date().getMonth() + 1;
 
     for (var i = 1; i < Math.min(sheets.length, 12); i++) {
         var sheet = sheets[i];
@@ -123,7 +126,7 @@ function _serveMain() {
             var n = row[myNumbers.expenseDescrColumn - 1];
             var t = row[myNumbers.expenseTypeColumn - 1];
             var p = row[myNumbers.expencePeriodColumn - 1];
-            if (n) expenseNames.add(n.toString().trim());
+            if (n && i === currentMonthIdx) expenseNames.add(n.toString().trim());
             if (t) expenseTypes.add(t.toString().trim());
             if (p) expensePeriods.add(p.toString().trim());
         });
