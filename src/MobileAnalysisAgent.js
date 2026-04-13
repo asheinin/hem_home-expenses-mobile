@@ -162,12 +162,27 @@ function _mobileGetSpreadsheetForYear(year) {
     if (ss.getName().indexOf(year.toString()) !== -1) return ss;
 
     // Search Drive for "Home Expenses {YYYY}" (e.g. "Home Expenses 2025")
-    var files = DriveApp.searchFiles(
-        'title = "Home Expenses ' + year + '" and mimeType = "' + MimeType.GOOGLE_SHEETS + '"'
-    );
-    if (files.hasNext()) {
-        return SpreadsheetApp.open(files.next());
+    var targetName = 'Home Expenses ' + year;
+    var files = DriveApp.getFilesByName(targetName);
+    
+    while (files.hasNext()) {
+        var file = files.next();
+        if (!file.isTrashed()) {
+            return SpreadsheetApp.openById(file.getId());
+        }
     }
+    
+    // In case there are older files named "Home payments {YYYY}"
+    var oldTargetName = 'Home payments ' + year;
+    var oldFiles = DriveApp.getFilesByName(oldTargetName);
+    
+    while (oldFiles.hasNext()) {
+        var oldFile = oldFiles.next();
+        if (!oldFile.isTrashed()) {
+            return SpreadsheetApp.openById(oldFile.getId());
+        }
+    }
+
     return null;
 }
 
