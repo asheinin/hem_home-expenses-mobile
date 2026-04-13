@@ -161,9 +161,9 @@ function _mobileGetSpreadsheetForYear(year) {
     var ss = _getSpreadsheet();
     if (ss.getName().indexOf(year.toString()) !== -1) return ss;
 
-    // Search Drive for the yearly file
+    // Search Drive for "Home Expenses {YYYY}" (e.g. "Home Expenses 2025")
     var files = DriveApp.searchFiles(
-        'title contains "Home Expenses ' + year + '" and mimeType = "' + MimeType.GOOGLE_SHEETS + '"'
+        'title = "Home Expenses ' + year + '" and mimeType = "' + MimeType.GOOGLE_SHEETS + '"'
     );
     if (files.hasNext()) {
         return SpreadsheetApp.open(files.next());
