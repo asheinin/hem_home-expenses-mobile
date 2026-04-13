@@ -391,7 +391,10 @@ function _mobileDetectExpenseSpikes(currentStats, yearAgoStats, myNumbers) {
 }
 
 function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis) {
-    var apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    // Check correct key, but also check the exact typo "GEMINI-API_KEY" the user reported having
+    var apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || 
+                 PropertiesService.getScriptProperties().getProperty('GEMINI-API_KEY');
+    
     if (!apiKey) return null;
 
     function fmt(val) {
@@ -445,11 +448,14 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
         };
         var response = UrlFetchApp.fetch(url, options);
         var json = JSON.parse(response.getContentText());
+        
         if (response.getResponseCode() === 200 && json.candidates && json.candidates[0]) {
             return json.candidates[0].content.parts[0].text.trim();
+        } else {
+            return 'API Error (' + response.getResponseCode() + '): ' + (json.error ? json.error.message : 'Unknown response format');
         }
     } catch (e) {
         Logger.log('Gemini call failed: ' + e);
+        return 'Execution Error: ' + e.toString();
     }
-    return null;
 }
