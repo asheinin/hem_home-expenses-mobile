@@ -410,7 +410,8 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
     var cur = comparisonData.current || {};
 
     var prompt = 'You are a household expense analysis agent. Analyze this data and provide 3-4 actionable insights.\n' +
-        'Be concise, helpful, and use bold text for key numbers. Format as HTML list (<ul><li>...</li></ul>).\n' +
+        'Be concise, helpful, and use bold text for key numbers. Format as clean HTML list (<ul><li>...</li></ul>).\n' +
+        'DO NOT use markdown code blocks like ```html. Return ONLY the HTML content.\n' +
         'Also advise of assumptions made in html (projections only, list assumptions for gasoline, misc, groceries, online purchases)\n\n' +
         'CURRENT MONTH: ' + comparisonData.currentMonthName + '\n' +
         '- Actual Spend to Date (Day ' + proj.currentDay + ' of ' + proj.daysInMonth + '): ' + fmt(proj.actualSpendToDate) + '\n' +
@@ -455,7 +456,10 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
         var json = JSON.parse(response.getContentText());
 
         if (response.getResponseCode() === 200 && json.candidates && json.candidates[0]) {
-            return json.candidates[0].content.parts[0].text.trim();
+            var text = json.candidates[0].content.parts[0].text.trim();
+            // Strip markdown code blocks if present
+            text = text.replace(/^```html\s*/i, '').replace(/```\s*$/i, '').trim();
+            return text;
         } else {
             return 'API Error (' + response.getResponseCode() + '): ' + (json.error ? json.error.message : 'Unknown response format');
         }
