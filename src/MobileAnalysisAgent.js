@@ -439,7 +439,7 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
     prompt += '\n\nProvide insights focusing on: spending trends, areas of concern, and actionable recommendations.';
 
     try {
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent?key=' + apiKey;
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
         var payload = {
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 1024 }
