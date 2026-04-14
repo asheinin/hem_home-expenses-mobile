@@ -164,18 +164,18 @@ function _mobileGetSpreadsheetForYear(year) {
     // Search Drive for "Home Expenses {YYYY}" (e.g. "Home Expenses 2025")
     var targetName = 'Home Expenses ' + year;
     var files = DriveApp.getFilesByName(targetName);
-    
+
     while (files.hasNext()) {
         var file = files.next();
         if (!file.isTrashed()) {
             return SpreadsheetApp.openById(file.getId());
         }
     }
-    
+
     // In case there are older files named "Home payments {YYYY}"
     var oldTargetName = 'Home payments ' + year;
     var oldFiles = DriveApp.getFilesByName(oldTargetName);
-    
+
     while (oldFiles.hasNext()) {
         var oldFile = oldFiles.next();
         if (!oldFile.isTrashed()) {
@@ -393,12 +393,12 @@ function _mobileDetectExpenseSpikes(currentStats, yearAgoStats, myNumbers) {
 function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis) {
     var props = PropertiesService.getScriptProperties().getProperties();
     var apiKey = props['GEMINI_API_KEY'] || props['GEMINI-API_KEY'];
-    
+
     if (!apiKey) {
         // Return diagnostic info so the UI shows exactly what property names exist
         var keys = Object.keys(props).join(', ');
         return '<strong>API key not found.</strong> Script Properties has these keys: [' + keys + ']. ' +
-               'Please ensure a property named exactly <code>GEMINI_API_KEY</code> exists.';
+            'Please ensure a property named exactly <code>GEMINI_API_KEY</code> exists.';
     }
 
     function fmt(val) {
@@ -439,7 +439,7 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
     prompt += '\n\nProvide insights focusing on: spending trends, areas of concern, and actionable recommendations.';
 
     try {
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey;
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent?key=' + apiKey;
         var payload = {
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 1024 }
@@ -452,7 +452,7 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
         };
         var response = UrlFetchApp.fetch(url, options);
         var json = JSON.parse(response.getContentText());
-        
+
         if (response.getResponseCode() === 200 && json.candidates && json.candidates[0]) {
             return json.candidates[0].content.parts[0].text.trim();
         } else {
