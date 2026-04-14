@@ -444,7 +444,7 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
         var url = myNumbers.agentUrl + apiKey;
         var payload = {
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 }
+            generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 4096 }
         };
         var options = {
             method: 'post',
@@ -458,7 +458,7 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
         if (response.getResponseCode() === 200 && json.candidates && json.candidates[0]) {
             var candidate = json.candidates[0];
             // Concatenate all parts (response can be split across multiple parts)
-            var text = (candidate.content.parts || []).map(function(p) { return p.text || ''; }).join('').trim();
+            var text = (candidate.content.parts || []).map(function (p) { return p.text || ''; }).join('').trim();
             Logger.log('Gemini finishReason: ' + candidate.finishReason + ' | length: ' + text.length);
             // Strip markdown code blocks if present
             text = text.replace(/^```html\s*/i, '').replace(/```\s*$/i, '').trim();
