@@ -391,11 +391,15 @@ function _mobileDetectExpenseSpikes(currentStats, yearAgoStats, myNumbers) {
 }
 
 function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis) {
-    // Check correct key, but also check the exact typo "GEMINI-API_KEY" the user reported having
-    var apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || 
-                 PropertiesService.getScriptProperties().getProperty('GEMINI-API_KEY');
+    var props = PropertiesService.getScriptProperties().getProperties();
+    var apiKey = props['GEMINI_API_KEY'] || props['GEMINI-API_KEY'];
     
-    if (!apiKey) return null;
+    if (!apiKey) {
+        // Return diagnostic info so the UI shows exactly what property names exist
+        var keys = Object.keys(props).join(', ');
+        return '<strong>API key not found.</strong> Script Properties has these keys: [' + keys + ']. ' +
+               'Please ensure a property named exactly <code>GEMINI_API_KEY</code> exists.';
+    }
 
     function fmt(val) {
         return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(val || 0);
