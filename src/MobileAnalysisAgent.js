@@ -391,8 +391,9 @@ function _mobileDetectExpenseSpikes(currentStats, yearAgoStats, myNumbers) {
 }
 
 function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis) {
+    var myNumbers = new staticNumbers();
     var props = PropertiesService.getScriptProperties().getProperties();
-    var apiKey = props['GEMINI_API_KEY'] || props['GEMINI-API_KEY'];
+    var apiKey = props['GEMINI_API_KEY'];
 
     if (!apiKey) {
         // Return diagnostic info so the UI shows exactly what property names exist
@@ -439,7 +440,7 @@ function _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysi
     prompt += '\n\nProvide insights focusing on: spending trends, areas of concern, and actionable recommendations.';
 
     try {
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+        var url = myNumbers.agentUrl + apiKey;
         var payload = {
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 1024 }

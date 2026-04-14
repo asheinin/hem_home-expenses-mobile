@@ -51,5 +51,10 @@ class staticNumbers {
         this.agentOnlinePurchasesMonthly = 800;
         this.agentGasolineMonthly = 0;
         this.agentMiscMonthly = 1000;
+
+        // Expense Analysis Agent - API Key
+        this.agentApiKey = 'GEMINI_API_KEY';
+        this.agentModel = 'gemini-2.5-flash';
+        this.agentUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + this.agentModel + ':generateContent?key='
     }
 }
