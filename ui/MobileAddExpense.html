@@ -1066,7 +1066,7 @@
                 <label class="field-label" for="expenseAmount">Amount</label>
                 <div class="prefix-wrap">
                     <span class="prefix">$</span>
-                    <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00">
+                    <input type="number" id="expenseAmount" step="0.01" placeholder="0.00">
                 </div>
             </div>
 
@@ -1499,8 +1499,8 @@
             var errors = [];
             if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
             if (!type) { errors.push('Category is required.'); markError('expenseType'); }
-            if (amount !== '' && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0)) {
-                errors.push('Amount must be a positive number.');
+            if (amount !== '' && isNaN(parseFloat(amount))) {
+                errors.push('Amount must be a valid number.');
                 markError('expenseAmount');
             }
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }

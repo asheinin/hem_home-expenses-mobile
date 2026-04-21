@@ -395,8 +395,8 @@ function mobileProcessForm(
         var amount;
         if (expenseAmount !== '' && expenseAmount !== null && expenseAmount !== undefined) {
             amount = parseFloat(expenseAmount);
-            if (isNaN(amount) || amount < 0) {
-                return { success: false, message: 'Amount must be a positive number.' };
+            if (isNaN(amount)) {
+                return { success: false, message: 'Amount must be a valid number.' };
             }
             amount = parseFloat(amount.toFixed(2));
         } else {

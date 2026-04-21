@@ -42,18 +42,14 @@ function getMonthlySummary() {
         var sp1Name = (dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse1NameColumn).getValue() || '').toString().trim();
         var sp2Name = (dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse2NameColumn).getValue() || '').toString().trim();
 
-        // Read current month's expense sheet directly for running total
+        // Read the month total from the SUM cell at expenseLastRow+1 in the expense sheet.
+        // This cell contains the spreadsheet SUM formula and correctly handles positive and negative amounts.
         var monthSheet = ss.getSheets()[currentMonthIdx];
         var runningTotal = 0;
         if (monthSheet) {
-            var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
-            var values = monthSheet
-                .getRange(myNumbers.expenseFirstRow, myNumbers.expenseAmountColumn, numRows, 1)
-                .getValues();
-            values.forEach(function (row) {
-                var amt = parseFloat(row[0]);
-                if (!isNaN(amt) && amt > 0) runningTotal += amt;
-            });
+            var totalCell = monthSheet.getRange(myNumbers.expenseLastRow + 1, myNumbers.expenseAmountColumn);
+            var cellValue = totalCell.getValue();
+            runningTotal = parseFloat(cellValue) || 0;
         }
 
         // Read balance columns from Dashboard for the current month row
