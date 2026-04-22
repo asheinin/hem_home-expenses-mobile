@@ -1482,7 +1482,12 @@
             if (r.aiInsights) {
                 html += '<div class="ai-insights-box">' + r.aiInsights + '</div>';
             } else {
-                html += '<div class="ai-no-insights">AI insights unavailable — set GEMINI_API_KEY in Script Properties to enable.</div>';
+                html += '<div class="ai-empty-state">';
+                html += '<div class="ai-empty-icon">🔑</div>';
+                html += '<div class="ai-empty-title">AI Analysis Requires API Key</div>';
+                html += '<div class="ai-empty-desc">Set up a Gemini API key in Script Properties to enable AI-powered expense insights.</div>';
+                html += '<a class="ai-empty-link" href="' + SETTINGS_URL + '" target="_top">Open Settings →</a>';
+                html += '</div>';
             }
 
             document.getElementById('aiContent').innerHTML = html;
@@ -1543,6 +1548,19 @@
                             '<td class="ref-amount" style="text-align:right">' + _esc(exp.amount) + '</td>';
                         tbody.appendChild(tr);
                     });
+
+                    // Calculate and display total row
+                    var total = 0;
+                    result.expenses.forEach(function (exp) {
+                        var rawAmt = exp.amount.replace(/[^\d.-]/g, '');
+                        var n = parseFloat(rawAmt);
+                        if (!isNaN(n)) total += n;
+                    });
+                    var fmtTotal = '$' + Math.abs(total).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    if (total < 0) fmtTotal = '-' + fmtTotal;
+                    document.getElementById('refTotalAmount').textContent = fmtTotal;
+                    document.getElementById('refTfoot').style.display = 'table-footer-group';
+
                     document.getElementById('refTable').style.display = 'table';
                 })
                 .withFailureHandler(function () {
@@ -1701,9 +1719,12 @@
             var paid = document.getElementById('paidToggle').checked;
             var period = document.getElementById('expensePeriod').value;
 
-            var paidBySelect = document.getElementById('paidBySelect');
-            var paidByIndex = parseInt(paidBySelect.value) || 0;
-            var paidByName = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text;
+            var paidByIndex = parseInt(document.getElementById('paidByValue').value) || 0;
+            var paidByName = '';
+            if (paidByIndex > 0) {
+                var activeBtn = document.querySelector('.seg-option[data-value="' + paidByIndex + '"]');
+                paidByName = activeBtn ? activeBtn.textContent.trim() : '';
+            }
 
             var actionType = _dupAction || '';
 
@@ -1727,12 +1748,19 @@
         }
 
         // ── UI helpers ────────────────────────────────────────────────────────────
+        var _alertTimer;
+
         function showAlert(msg, type) {
+            if (_alertTimer) { clearTimeout(_alertTimer); _alertTimer = null; }
             var box = document.getElementById('alertBox');
             box.textContent = msg;
             box.className = 'alert alert-' + type;
             box.style.display = 'block';
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            // Auto-dismiss success alerts after 4 seconds
+            if (type === 'success') {
+                _alertTimer = setTimeout(function() { clearAlert(); }, 4000);
+            }
         }
 
         function clearAlert() {
@@ -1765,12 +1793,18 @@
             document.getElementById('papToggle').checked = false;
             document.getElementById('paidToggle').checked = false;
             document.getElementById('expensePeriod').value = '';
-            document.getElementById('paidBySelect').value = '0';
+            // Reset Who Paid segmented control
+            document.getElementById('paidByValue').value = '0';
+            var segBtns = document.querySelectorAll('#paidBySegmented .seg-option');
+            segBtns.forEach(function(b) { b.classList.remove('active'); });
+            if (segBtns.length) segBtns[0].classList.add('active');
             _dupAction = '';
             _refLoaded = false;
             _refExpenses = [];
             _loadRefData(); // Re-fetch baseline info automatically
             refreshSummary(); // Auto-refresh summary banner after add
+            // Scroll back to top so user sees form reset
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Auto-load reference baseline instantly on page load
@@ -1847,11 +1881,22 @@
         }
 
         setupAutocomplete('expenseName', 'expenseNameDropdown', _serverExpenseNames);
+        setupAutocomplete('expenseType', 'expenseTypeDropdown', _serverExpenseTypes);
 
-        // Hide autocomplete when tapping outside
+        // ── Segmented control (Who Paid) ──
+        function setPaidBy(el) {
+            var btns = document.querySelectorAll('#paidBySegmented .seg-option');
+            btns.forEach(function(b) { b.classList.remove('active'); });
+            el.classList.add('active');
+            document.getElementById('paidByValue').value = el.getAttribute('data-value');
+        }
+
+        // Hide all autocomplete dropdowns when tapping outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.ac-container')) {
-                document.getElementById('expenseNameDropdown').classList.remove('open');
+                document.querySelectorAll('.ac-dropdown').forEach(function(d) {
+                    d.classList.remove('open');
+                });
             }
         });
     </script>
