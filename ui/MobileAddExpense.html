@@ -1066,7 +1066,7 @@
                 <label class="field-label" for="expenseAmount">Amount</label>
                 <div class="prefix-wrap">
                     <span class="prefix">$</span>
-                    <input type="number" id="expenseAmount" step="0.01" placeholder="0.00">
+                    <input type="text" id="expenseAmount" inputmode="decimal" pattern="-?[0-9]*\.?[0-9]*" placeholder="0.00" autocomplete="off">
                 </div>
             </div>
 
@@ -1499,8 +1499,8 @@
             var errors = [];
             if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
             if (!type) { errors.push('Category is required.'); markError('expenseType'); }
-            if (amount !== '' && isNaN(parseFloat(amount))) {
-                errors.push('Amount must be a valid number.');
+            if (amount !== '' && (isNaN(parseFloat(amount.replace(',', '.'))) || !/^-?\d*\.?\d+$/.test(amount.trim()))) {
+                errors.push('Amount must be a valid number (e.g. 12.50 or -5.00).');
                 markError('expenseAmount');
             }
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
