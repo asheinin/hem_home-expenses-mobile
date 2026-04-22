@@ -468,33 +468,29 @@
             gap: 8px;
             flex-wrap: wrap;
             margin-top: 12px;
+            margin-bottom: 10px;
         }
 
         .summary-pill {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: rgba(255, 255, 255, 0.22);
-            border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255, 255, 255, 0.18);
             border-radius: 100px;
-            padding: 5px 12px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 500;
             color: white;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            transition: background 0.2s;
         }
 
         .summary-pill .pill-label {
             font-weight: 400;
             opacity: 0.80;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .summary-pill.owe-pill {
             background: rgba(255, 200, 80, 0.28);
-            border-color: rgba(255, 200, 80, 0.50);
         }
 
         .summary-refresh-btn {
@@ -1251,14 +1247,15 @@
 
             <!-- Who Paid -->
             <div class="form-group">
-                <label class="field-label">Who Paid?</label>
-                <div class="seg-control" id="paidBySegmented">
-                    <button type="button" class="seg-option active" data-value="0" onclick="setPaidBy(this)">Not Specified</button>
+                <label class="field-label" for="paidBySelect">Who Paid?</label>
+                <select id="paidBySelect">
+                    <option value="0">— Not Specified —</option>
                     <? for (var i = 0; i < spouseNames.length; i++) { ?>
-                    <button type="button" class="seg-option" data-value="<?= i + 1 ?>" onclick="setPaidBy(this)"><?= spouseNames[i] ?></button>
+                    <option value="<?= i + 1 ?>">
+                        <?= spouseNames[i] ?>
+                    </option>
                     <? } ?>
-                </div>
-                <input type="hidden" id="paidByValue" value="0">
+                </select>
             </div>
 
             <!-- Submit -->
@@ -1719,12 +1716,9 @@
             var paid = document.getElementById('paidToggle').checked;
             var period = document.getElementById('expensePeriod').value;
 
-            var paidByIndex = parseInt(document.getElementById('paidByValue').value) || 0;
-            var paidByName = '';
-            if (paidByIndex > 0) {
-                var activeBtn = document.querySelector('.seg-option[data-value="' + paidByIndex + '"]');
-                paidByName = activeBtn ? activeBtn.textContent.trim() : '';
-            }
+            var paidBySelect = document.getElementById('paidBySelect');
+            var paidByIndex = parseInt(paidBySelect.value) || 0;
+            var paidByName = paidByIndex === 0 ? '' : paidBySelect.options[paidBySelect.selectedIndex].text.trim();
 
             var actionType = _dupAction || '';
 
@@ -1793,11 +1787,7 @@
             document.getElementById('papToggle').checked = false;
             document.getElementById('paidToggle').checked = false;
             document.getElementById('expensePeriod').value = '';
-            // Reset Who Paid segmented control
-            document.getElementById('paidByValue').value = '0';
-            var segBtns = document.querySelectorAll('#paidBySegmented .seg-option');
-            segBtns.forEach(function(b) { b.classList.remove('active'); });
-            if (segBtns.length) segBtns[0].classList.add('active');
+            document.getElementById('paidBySelect').value = '0';
             _dupAction = '';
             _refLoaded = false;
             _refExpenses = [];
@@ -1883,13 +1873,6 @@
         setupAutocomplete('expenseName', 'expenseNameDropdown', _serverExpenseNames);
         setupAutocomplete('expenseType', 'expenseTypeDropdown', _serverExpenseTypes);
 
-        // ── Segmented control (Who Paid) ──
-        function setPaidBy(el) {
-            var btns = document.querySelectorAll('#paidBySegmented .seg-option');
-            btns.forEach(function(b) { b.classList.remove('active'); });
-            el.classList.add('active');
-            document.getElementById('paidByValue').value = el.getAttribute('data-value');
-        }
 
         // Hide all autocomplete dropdowns when tapping outside
         document.addEventListener('click', function(e) {
