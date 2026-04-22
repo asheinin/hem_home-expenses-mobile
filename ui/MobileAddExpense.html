@@ -282,8 +282,8 @@
 
         .sign-btn {
             flex-shrink: 0;
-            width: 42px;
-            height: 42px;
+            width: 46px;
+            height: 46px;
             border-radius: 10px;
             border: 1.5px solid var(--border);
             background: #ecfdf5;
@@ -298,6 +298,11 @@
             transition: background 0.18s, color 0.18s, border-color 0.18s;
             line-height: 1;
             user-select: none;
+        }
+
+        .sign-btn:focus-visible {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.35);
+            outline: none;
         }
 
         .sign-btn.negative {
@@ -496,9 +501,13 @@
             background: none;
             border: none;
             color: rgba(255,255,255,0.65);
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
-            padding: 0 2px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             line-height: 1;
             transition: color 0.15s, transform 0.3s;
             flex-shrink: 0;
@@ -623,9 +632,9 @@
             background: rgba(255,255,255,0.20);
             border: none;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            font-size: 14px;
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
             cursor: pointer;
             color: white;
             display: flex;
@@ -747,10 +756,54 @@
         .ai-insights-box li { margin-bottom: 8px; }
 
         .ai-no-insights {
-            padding: 16px;
+            padding: 28px 16px;
             text-align: center;
             color: var(--muted);
             font-size: 13px;
+        }
+
+        .ai-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 36px 24px;
+            text-align: center;
+        }
+
+        .ai-empty-icon {
+            font-size: 40px;
+            line-height: 1;
+        }
+
+        .ai-empty-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .ai-empty-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .ai-empty-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1.5px solid var(--primary);
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .ai-empty-link:hover {
+            background: #f0f2ff;
         }
 
         .change-up { color: #dc2626; font-weight: 600; }
@@ -830,9 +883,9 @@
             background: #f0f0f5;
             border: none;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            font-size: 14px;
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
             cursor: pointer;
             color: var(--muted);
             display: flex;
@@ -901,6 +954,14 @@
             font-weight: 600;
             color: var(--primary-dark);
             white-space: nowrap;
+        }
+
+        .ref-total-row td {
+            font-weight: 700;
+            color: var(--text);
+            border-top: 2px solid var(--border);
+            background: #f8f9ff;
+            padding: 10px 14px;
         }
 
         .ref-type-badge {
@@ -994,6 +1055,42 @@
             background: #f8f9ff;
             color: var(--primary-dark);
         }
+
+        /* ── Segmented control (Who Paid) ── */
+        .seg-control {
+            display: flex;
+            background: #f0f2ff;
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+            border: 1.5px solid var(--border);
+        }
+
+        .seg-option {
+            flex: 1;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+
+        .seg-option.active {
+            background: white;
+            color: var(--primary-dark);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .seg-option:active {
+            opacity: 0.75;
+        }
     </style>
 </head>
 
@@ -1009,7 +1106,7 @@
                         title="Settings">⚙️</a>
                     <div class="dots-wrap" id="dotsWrap">
                         <button class="dots-btn" id="dotsBtn" onclick="toggleDotsMenu(event)"
-                            title="More options">⋮</button>
+                            title="More options" aria-label="More options">⋮</button>
                         <div class="dots-menu" id="dotsMenu">
                             <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
                             <div class="dots-menu-item" onclick="openAnalysisSheet()">🤖 AI Expense Analysis</div>
@@ -1039,7 +1136,7 @@
                     <span id="summaryOweName">—</span>
                     <span id="summaryOweAmount">—</span>
                 </div>
-                <button class="summary-refresh-btn" id="summaryRefreshBtn" onclick="refreshSummary()" title="Refresh">↻</button>
+                <button class="summary-refresh-btn" id="summaryRefreshBtn" onclick="refreshSummary()" title="Refresh" aria-label="Refresh summary">↻</button>
             </div>
 
             <div class="mode-tabs">
@@ -1080,17 +1177,16 @@
                 <label class="field-label" for="expenseType">
                     Category <span class="required">*</span>
                 </label>
-                <input type="text" id="expenseType" list="typeChoices" placeholder="Select or type new category" autocomplete="off">
-                <datalist id="typeChoices">
-                    <? for (var i = 0; i < expenseTypes.length; i++) { ?>
-                    <option value="<?= expenseTypes[i] ?>"></option>
-                    <? } ?>
-                </datalist>
+                <div class="ac-container">
+                    <input type="text" id="expenseType" placeholder="Select or type category" autocomplete="off">
+                    <div class="ac-dropdown" id="expenseTypeDropdown"></div>
+                </div>
             </div>
 
             <!-- Initialize JS arrays from server data -->
             <script>
                 var _serverExpenseNames = <?!= JSON.stringify(expenseNames) ?>;
+                var _serverExpenseTypes = <?!= JSON.stringify(expenseTypes) ?>;
                 var _nameCategoryMap = <?!= JSON.stringify(nameCategoryMap) ?>;
             </script>
 
@@ -1098,7 +1194,7 @@
             <div class="form-group">
                 <label class="field-label" for="expenseAmount">Amount</label>
                 <div class="amount-row">
-                    <button type="button" class="sign-btn" id="signBtn" onclick="toggleSign()" title="Toggle sign">+</button>
+                    <button type="button" class="sign-btn" id="signBtn" onclick="toggleSign()" title="Toggle sign" aria-label="Toggle positive or negative amount">+</button>
                     <div class="prefix-wrap">
                         <span class="prefix">$</span>
                         <input type="text" id="expenseAmount" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" placeholder="0.00" autocomplete="off">
@@ -1155,15 +1251,14 @@
 
             <!-- Who Paid -->
             <div class="form-group">
-                <label class="field-label" for="paidBySelect">Who Paid?</label>
-                <select id="paidBySelect">
-                    <option value="0">— Not Specified —</option>
+                <label class="field-label">Who Paid?</label>
+                <div class="seg-control" id="paidBySegmented">
+                    <button type="button" class="seg-option active" data-value="0" onclick="setPaidBy(this)">Not Specified</button>
                     <? for (var i = 0; i < spouseNames.length; i++) { ?>
-                    <option value="<?= i + 1 ?>">
-                        <?= spouseNames[i] ?>
-                    </option>
+                    <button type="button" class="seg-option" data-value="<?= i + 1 ?>" onclick="setPaidBy(this)"><?= spouseNames[i] ?></button>
                     <? } ?>
-                </select>
+                </div>
+                <input type="hidden" id="paidByValue" value="0">
             </div>
 
             <!-- Submit -->
@@ -1182,7 +1277,7 @@
         <div class="ref-sheet-header">
             <span class="ref-sheet-title" id="refTitle">This Month's Expenses</span>
             <span class="ref-count" id="refCount" style="display:none">0</span>
-            <button class="ref-close-btn" onclick="closeRefModal()">✕</button>
+            <button class="ref-close-btn" onclick="closeRefModal()" aria-label="Close">✕</button>
         </div>
         <div class="ref-sheet-body">
             <div class="ref-loading" id="refLoading">Loading…</div>
@@ -1195,6 +1290,12 @@
                     </tr>
                 </thead>
                 <tbody id="refTbody"></tbody>
+                <tfoot id="refTfoot" style="display:none">
+                    <tr class="ref-total-row">
+                        <td colspan="2">Total</td>
+                        <td class="ref-amount" style="text-align:right" id="refTotalAmount">—</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -1205,7 +1306,7 @@
         <div class="ai-sheet-handle"></div>
         <div class="ai-sheet-header">
             <span class="ai-sheet-title">🤖 AI Expense Analysis</span>
-            <button class="ai-close-btn" onclick="closeAnalysisSheet()">✕</button>
+            <button class="ai-close-btn" onclick="closeAnalysisSheet()" aria-label="Close">✕</button>
         </div>
         <div class="ai-sheet-body" id="aiSheetBody">
             <div class="ai-loading" id="aiLoading">
