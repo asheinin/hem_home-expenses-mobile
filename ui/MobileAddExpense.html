@@ -273,9 +273,42 @@
             background: #fff8f8 !important;
         }
 
-        /* Amount with $ prefix */
+        /* Amount with $ prefix + sign toggle */
+        .amount-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sign-btn {
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: #ecfdf5;
+            color: #059669;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.18s, color 0.18s, border-color 0.18s;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .sign-btn.negative {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
         .prefix-wrap {
             position: relative;
+            flex: 1;
         }
 
         .prefix-wrap .prefix {
@@ -1064,9 +1097,12 @@
             <!-- Amount -->
             <div class="form-group">
                 <label class="field-label" for="expenseAmount">Amount</label>
-                <div class="prefix-wrap">
-                    <span class="prefix">$</span>
-                    <input type="text" id="expenseAmount" inputmode="decimal" pattern="-?[0-9]*\.?[0-9]*" placeholder="0.00" autocomplete="off">
+                <div class="amount-row">
+                    <button type="button" class="sign-btn" id="signBtn" onclick="toggleSign()" title="Toggle sign">+</button>
+                    <div class="prefix-wrap">
+                        <span class="prefix">$</span>
+                        <input type="text" id="expenseAmount" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" placeholder="0.00" autocomplete="off">
+                    </div>
                 </div>
             </div>
 
@@ -1486,6 +1522,25 @@
             if (this.checked) document.getElementById('papToggle').checked = false;
         });
 
+        // ── Sign toggle ──────────────────────────────────────────────────────────
+        var _amountNegative = false;
+
+        function toggleSign() {
+            _amountNegative = !_amountNegative;
+            var btn = document.getElementById('signBtn');
+            btn.textContent = _amountNegative ? '−' : '+';
+            btn.classList.toggle('negative', _amountNegative);
+        }
+
+        /** Returns the signed raw amount string (e.g. '-25.00') or '' if blank. */
+        function getSignedAmount() {
+            var raw = document.getElementById('expenseAmount').value.trim();
+            if (raw === '') return '';
+            var n = parseFloat(raw);
+            if (isNaN(n)) return raw; // let validation catch it
+            return _amountNegative ? String(-Math.abs(n)) : String(Math.abs(n));
+        }
+
         // ── Submission ───────────────────────────────────────────────────
         function submitForm() {
             clearAlert();
@@ -1493,14 +1548,14 @@
 
             var name = document.getElementById('expenseName').value.trim();
             var type = document.getElementById('expenseType').value.trim();
-            var amount = document.getElementById('expenseAmount').value;
+            var amount = getSignedAmount();
 
             // Client-side validation
             var errors = [];
             if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
             if (!type) { errors.push('Category is required.'); markError('expenseType'); }
-            if (amount !== '' && (isNaN(parseFloat(amount.replace(',', '.'))) || !/^-?\d*\.?\d+$/.test(amount.trim()))) {
-                errors.push('Amount must be a valid number (e.g. 12.50 or -5.00).');
+            if (amount !== '' && isNaN(parseFloat(amount))) {
+                errors.push('Amount must be a valid number (e.g. 12.50).');
                 markError('expenseAmount');
             }
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
@@ -1539,7 +1594,7 @@
         function _doSubmit() {
             var name = document.getElementById('expenseName').value.trim();
             var type = document.getElementById('expenseType').value.trim();
-            var amount = document.getElementById('expenseAmount').value;
+            var amount = getSignedAmount();
             var pap = document.getElementById('papToggle').checked;
             var split = document.getElementById('splitToggle').checked;
             var paid = document.getElementById('paidToggle').checked;
@@ -1600,6 +1655,11 @@
             document.getElementById('expenseName').value = '';
             document.getElementById('expenseType').value = '';
             document.getElementById('expenseAmount').value = '';
+            // Reset sign toggle to positive
+            _amountNegative = false;
+            var btn = document.getElementById('signBtn');
+            btn.textContent = '+';
+            btn.classList.remove('negative');
             document.getElementById('splitToggle').checked = true;
             document.getElementById('papToggle').checked = false;
             document.getElementById('paidToggle').checked = false;
