@@ -7,6 +7,7 @@ class staticNumbers {
         this.expenseCarryOverRow = 2;
         this.expenseFirstRow = 3;
         this.expenseLastRow = 50;
+        this.expenseTotalAmountRowBeforeSplit = 52;
         this.expenseTotalAmountRow = 53;
         this.expenseTotalPaidSp2Row = 56;
         this.expenseTotalPaidSp1Row = 60;

@@ -47,7 +47,7 @@ function getMonthlySummary() {
         var monthSheet = ss.getSheets()[currentMonthIdx];
         var runningTotal = 0;
         if (monthSheet) {
-            var totalCell = monthSheet.getRange(myNumbers.expenseTotalAmountRow, myNumbers.expenseAmountColumn);
+            var totalCell = monthSheet.getRange(myNumbers.expenseTotalAmountRowBeforeSplit, myNumbers.expenseAmountColumn);
             var cellValue = totalCell.getValue();
             runningTotal = parseFloat(cellValue) || 0;
         }
