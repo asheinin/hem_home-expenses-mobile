@@ -74,6 +74,34 @@ function _autoSwitchTriggerInstalled() {
     return false;
 }
 
+/** 
+ * Generate a dynamic PWA manifest and encode it as Base64 to inject into HTML directly.
+ * This bypasses Google Apps Script's cross-domain web app iframe restrictions.
+ */
+function _getBase64Manifest() {
+    var manifest = {
+        "short_name": "HE",
+        "name": "HomeExpenses",
+        "icons": [
+            {
+                "src": "https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD",
+                "type": "image/png",
+                "sizes": "192x192"
+            },
+            {
+                "src": "https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD",
+                "type": "image/png",
+                "sizes": "512x512"
+            }
+        ],
+        "start_url": ScriptApp.getService().getUrl(),
+        "display": "standalone",
+        "theme_color": "#667eea",
+        "background_color": "#f8f9fc"
+    };
+    return Utilities.base64Encode(JSON.stringify(manifest));
+}
+
 // ============================================================================
 // Web App entry point
 // ============================================================================
@@ -161,6 +189,7 @@ function _serveMain() {
     template.currentDateStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "MMMM dd, yyyy");
     template.configError = null;
     template.spreadsheetName = ss.getName();
+    template.manifestBase64 = _getBase64Manifest();
 
     return template
         .evaluate()
@@ -187,6 +216,7 @@ function _serveSettings() {
     template.currentName = currentName;
     template.autoSwitchInstalled = _autoSwitchTriggerInstalled();
     template.nextYear = new Date().getFullYear() + 1;
+    template.manifestBase64 = _getBase64Manifest();
 
     return template
         .evaluate()
