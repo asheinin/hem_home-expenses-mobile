@@ -465,10 +465,12 @@
         /* ── Monthly summary banner ── */
         .summary-banner {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
             margin-top: 12px;
             margin-bottom: 10px;
+            width: 100%;
         }
 
         .summary-pill {
@@ -477,16 +479,18 @@
             gap: 5px;
             background: rgba(255, 255, 255, 0.18);
             border-radius: 100px;
-            padding: 4px 10px;
-            font-size: 11px;
+            padding: 5px 12px;
+            font-size: 12px;
             font-weight: 500;
             color: white;
+            white-space: nowrap;
+            flex-shrink: 1;
         }
 
         .summary-pill .pill-label {
             font-weight: 400;
             opacity: 0.80;
-            font-size: 10px;
+            font-size: 11px;
         }
 
         .summary-pill.owe-pill {
@@ -497,16 +501,17 @@
             background: none;
             border: none;
             color: rgba(255, 255, 255, 0.65);
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            min-width: 44px;
-            min-height: 44px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             line-height: 1;
             transition: color 0.15s, transform 0.3s;
             flex-shrink: 0;
+            margin-left: auto;
         }
 
         .summary-refresh-btn:hover {
