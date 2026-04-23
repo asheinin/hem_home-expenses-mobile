@@ -496,7 +496,7 @@
         .summary-refresh-btn {
             background: none;
             border: none;
-            color: rgba(255,255,255,0.65);
+            color: rgba(255, 255, 255, 0.65);
             font-size: 16px;
             cursor: pointer;
             min-width: 44px;
@@ -509,8 +509,13 @@
             flex-shrink: 0;
         }
 
-        .summary-refresh-btn:hover { color: white; }
-        .summary-refresh-btn.spinning { animation: spin 0.8s linear infinite; }
+        .summary-refresh-btn:hover {
+            color: white;
+        }
+
+        .summary-refresh-btn.spinning {
+            animation: spin 0.8s linear infinite;
+        }
 
         /* ── 3-dots header menu ── */
         .header-actions {
@@ -595,7 +600,9 @@
             transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
         }
 
-        .ai-sheet.open { transform: translateY(0); }
+        .ai-sheet.open {
+            transform: translateY(0);
+        }
 
         .ai-sheet-handle {
             width: 36px;
@@ -625,7 +632,7 @@
         }
 
         .ai-close-btn {
-            background: rgba(255,255,255,0.20);
+            background: rgba(255, 255, 255, 0.20);
             border: none;
             border-radius: 50%;
             width: 36px;
@@ -640,7 +647,9 @@
             transition: background 0.15s;
         }
 
-        .ai-close-btn:hover { background: rgba(255,255,255,0.35); }
+        .ai-close-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
 
         .ai-sheet-body {
             overflow-y: auto;
@@ -663,7 +672,7 @@
         .ai-spinner {
             width: 36px;
             height: 36px;
-            border: 3px solid rgba(102,126,234,0.20);
+            border: 3px solid rgba(102, 126, 234, 0.20);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -737,7 +746,7 @@
 
         .ai-insights-box {
             background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
-            border: 1.5px solid rgba(102,126,234,0.25);
+            border: 1.5px solid rgba(102, 126, 234, 0.25);
             border-radius: 14px;
             padding: 16px;
             font-size: 13.5px;
@@ -748,8 +757,14 @@
             overflow-wrap: break-word;
         }
 
-        .ai-insights-box ul { padding-left: 18px; margin: 0; }
-        .ai-insights-box li { margin-bottom: 8px; }
+        .ai-insights-box ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .ai-insights-box li {
+            margin-bottom: 8px;
+        }
 
         .ai-no-insights {
             padding: 28px 16px;
@@ -802,9 +817,20 @@
             background: #f0f2ff;
         }
 
-        .change-up { color: #dc2626; font-weight: 600; }
-        .change-down { color: #059669; font-weight: 600; }
-        .change-neu { color: var(--muted); font-weight: 600; }
+        .change-up {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .change-down {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .change-neu {
+            color: var(--muted);
+            font-weight: 600;
+        }
 
         /* ── Reference bottom sheet ── */
         .ref-overlay {
@@ -952,12 +978,31 @@
             white-space: nowrap;
         }
 
-        .ref-total-row td {
+        .ref-total-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #f0f2ff;
+            border-bottom: 1.5px solid var(--border);
+            font-size: 13px;
             font-weight: 700;
             color: var(--text);
-            border-top: 2px solid var(--border);
-            background: #f8f9ff;
-            padding: 10px 14px;
+            flex-shrink: 0;
+        }
+
+        .ref-total-banner .ref-total-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .ref-total-banner .ref-total-value {
+            color: var(--primary-dark);
+            font-size: 15px;
+            font-weight: 700;
         }
 
         .ref-type-badge {
@@ -1047,7 +1092,8 @@
             border-bottom: none;
         }
 
-        .ac-item:hover, .ac-item:active {
+        .ac-item:hover,
+        .ac-item:active {
             background: #f8f9ff;
             color: var(--primary-dark);
         }
@@ -1101,8 +1147,8 @@
                     <a class="settings-link" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
                         title="Settings">⚙️</a>
                     <div class="dots-wrap" id="dotsWrap">
-                        <button class="dots-btn" id="dotsBtn" onclick="toggleDotsMenu(event)"
-                            title="More options" aria-label="More options">⋮</button>
+                        <button class="dots-btn" id="dotsBtn" onclick="toggleDotsMenu(event)" title="More options"
+                            aria-label="More options">⋮</button>
                         <div class="dots-menu" id="dotsMenu">
                             <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
                             <div class="dots-menu-item" onclick="openAnalysisSheet()">🤖 AI Expense Analysis</div>
@@ -1132,7 +1178,8 @@
                     <span id="summaryOweName">—</span>
                     <span id="summaryOweAmount">—</span>
                 </div>
-                <button class="summary-refresh-btn" id="summaryRefreshBtn" onclick="refreshSummary()" title="Refresh" aria-label="Refresh summary">↻</button>
+                <button class="summary-refresh-btn" id="summaryRefreshBtn" onclick="refreshSummary()" title="Refresh"
+                    aria-label="Refresh summary">↻</button>
             </div>
 
             <div class="mode-tabs">
@@ -1190,10 +1237,12 @@
             <div class="form-group">
                 <label class="field-label" for="expenseAmount">Amount</label>
                 <div class="amount-row">
-                    <button type="button" class="sign-btn" id="signBtn" onclick="toggleSign()" title="Toggle sign" aria-label="Toggle positive or negative amount">+</button>
+                    <button type="button" class="sign-btn" id="signBtn" onclick="toggleSign()" title="Toggle sign"
+                        aria-label="Toggle positive or negative amount">+</button>
                     <div class="prefix-wrap">
                         <span class="prefix">$</span>
-                        <input type="text" id="expenseAmount" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" placeholder="0.00" autocomplete="off">
+                        <input type="text" id="expenseAmount" inputmode="decimal" pattern="[0-9]*\.?[0-9]*"
+                            placeholder="0.00" autocomplete="off">
                     </div>
                 </div>
             </div>
@@ -1276,6 +1325,10 @@
             <span class="ref-count" id="refCount" style="display:none">0</span>
             <button class="ref-close-btn" onclick="closeRefModal()" aria-label="Close">✕</button>
         </div>
+        <div class="ref-total-banner" id="refTotalBanner" style="display:none">
+            <span class="ref-total-label">Total</span>
+            <span class="ref-total-value" id="refTotalAmount">—</span>
+        </div>
         <div class="ref-sheet-body">
             <div class="ref-loading" id="refLoading">Loading…</div>
             <table class="ref-table" id="refTable" style="display:none">
@@ -1287,12 +1340,6 @@
                     </tr>
                 </thead>
                 <tbody id="refTbody"></tbody>
-                <tfoot id="refTfoot" style="display:none">
-                    <tr class="ref-total-row">
-                        <td colspan="2">Total</td>
-                        <td class="ref-amount" style="text-align:right" id="refTotalAmount">—</td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
     </div>
@@ -1334,7 +1381,7 @@
         }
 
         function _renderSummary(res) {
-            var fmt = function(v) {
+            var fmt = function (v) {
                 return '$' + parseFloat(v || 0).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             };
             document.getElementById('summaryTotalValue').textContent = fmt(res.runningTotal);
@@ -1351,12 +1398,12 @@
         }
 
         // Auto-load on page load
-        (function() {
+        (function () {
             google.script.run
-                .withSuccessHandler(function(res) {
+                .withSuccessHandler(function (res) {
                     if (res && res.success) _renderSummary(res);
                 })
-                .withFailureHandler(function() {})
+                .withFailureHandler(function () { })
                 .getMonthlySummary();
         })();
 
@@ -1400,10 +1447,10 @@
         }
 
         function _renderAnalysis(r) {
-            var fmt = function(v) {
+            var fmt = function (v) {
                 return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(v || 0);
             };
-            var pct = function(v, suffix) {
+            var pct = function (v, suffix) {
                 if (v === null || v === undefined) return '<span class="change-neu">N/A</span>';
                 var n = parseFloat(v);
                 var cls = n > 0 ? 'change-up' : (n < 0 ? 'change-down' : 'change-neu');
@@ -1462,12 +1509,12 @@
             // ── Expense Anomalies ──
             if (r.spikes && r.spikes.hasAnomalies) {
                 html += '<div class="ai-section-title">⚠️ Expense Anomalies</div>';
-                (r.spikes.spikes || []).forEach(function(s) {
+                (r.spikes.spikes || []).forEach(function (s) {
                     html += '<div class="ai-spike-item ai-spike-high">';
                     html += '<div><strong>' + _esc(s.category) + '</strong><br><small>' + fmt(s.currentAmount) + ' (HIGH +' + _esc(s.percentChange) + '%)</small></div>';
                     html += '</div>';
                 });
-                (r.spikes.aboveNormal || []).forEach(function(s) {
+                (r.spikes.aboveNormal || []).forEach(function (s) {
                     html += '<div class="ai-spike-item ai-spike-above">';
                     html += '<div><strong>' + _esc(s.category) + '</strong><br><small>' + fmt(s.currentAmount) + ' (+' + _esc(s.percentChange) + '% above normal)</small></div>';
                     html += '</div>';
@@ -1546,7 +1593,7 @@
                         tbody.appendChild(tr);
                     });
 
-                    // Calculate and display total row
+                    // Calculate and display total in top banner
                     var total = 0;
                     result.expenses.forEach(function (exp) {
                         var rawAmt = exp.amount.replace(/[^\d.-]/g, '');
@@ -1556,7 +1603,7 @@
                     var fmtTotal = '$' + Math.abs(total).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     if (total < 0) fmtTotal = '-' + fmtTotal;
                     document.getElementById('refTotalAmount').textContent = fmtTotal;
-                    document.getElementById('refTfoot').style.display = 'table-footer-group';
+                    document.getElementById('refTotalBanner').style.display = 'flex';
 
                     document.getElementById('refTable').style.display = 'table';
                 })
@@ -1632,7 +1679,15 @@
 
         // ── PAP / Paid mutual exclusivity ─────────────────────────────────────────
         document.getElementById('papToggle').addEventListener('change', function () {
-            if (this.checked) document.getElementById('paidToggle').checked = false;
+            var paidToggle = document.getElementById('paidToggle');
+            if (this.checked) {
+                paidToggle.checked = false;
+                paidToggle.disabled = true;
+                paidToggle.closest('.toggle-item').style.opacity = '0.4';
+            } else {
+                paidToggle.disabled = false;
+                paidToggle.closest('.toggle-item').style.opacity = '1';
+            }
         });
         document.getElementById('paidToggle').addEventListener('change', function () {
             if (this.checked) document.getElementById('papToggle').checked = false;
@@ -1683,7 +1738,7 @@
                     .withSuccessHandler(function (result) {
                         _refLoaded = true;
                         if (result && result.success) _refExpenses = result.expenses;
-                        
+
                         if (_checkDuplicate(name, type)) {
                             setLoading(false);
                             _showDuplicateWarning(name, type);
@@ -1753,7 +1808,7 @@
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             // Auto-dismiss success alerts after 4 seconds
             if (type === 'success') {
-                _alertTimer = setTimeout(function() { clearAlert(); }, 4000);
+                _alertTimer = setTimeout(function () { clearAlert(); }, 4000);
             }
         }
 
@@ -1785,7 +1840,10 @@
             btn.classList.remove('negative');
             document.getElementById('splitToggle').checked = true;
             document.getElementById('papToggle').checked = false;
-            document.getElementById('paidToggle').checked = false;
+            var paidToggle = document.getElementById('paidToggle');
+            paidToggle.checked = false;
+            paidToggle.disabled = false;
+            paidToggle.closest('.toggle-item').style.opacity = '1';
             document.getElementById('expensePeriod').value = '';
             document.getElementById('paidBySelect').value = '0';
             _dupAction = '';
@@ -1810,24 +1868,24 @@
                 var q = query.toLowerCase().trim();
                 dropdown.innerHTML = '';
                 var matches = 0;
-                
-                sourceArray.forEach(function(item) {
+
+                sourceArray.forEach(function (item) {
                     if (item.toLowerCase().indexOf(q) !== -1) {
                         matches++;
                         var div = document.createElement('div');
                         div.className = 'ac-item';
                         div.textContent = item;
-                        
+
                         // Handle mousedown to prevent input blur hiding it before click registers
-                        div.addEventListener('mousedown', function(e) {
+                        div.addEventListener('mousedown', function (e) {
                             e.preventDefault();
                         });
-                        
-                        div.addEventListener('click', function(e) {
+
+                        div.addEventListener('click', function (e) {
                             e.stopPropagation();
                             input.value = item;
                             dropdown.classList.remove('open');
-                            
+
                             // Auto-populate Category if they clicked a Name
                             if (_nameCategoryMap[item.toLowerCase()]) {
                                 document.getElementById('expenseType').value = _nameCategoryMap[item.toLowerCase()];
@@ -1844,27 +1902,27 @@
                 }
             }
 
-            input.addEventListener('input', function() {
+            input.addEventListener('input', function () {
                 var val = this.value;
                 if (!val) {
                     dropdown.classList.remove('open');
                     return;
                 }
                 renderOptions(val);
-                
+
                 // Same auto-fill logic if they type the full name naturally
                 if (_nameCategoryMap[val.toLowerCase().trim()]) {
                     document.getElementById('expenseType').value = _nameCategoryMap[val.toLowerCase().trim()];
                 }
             });
 
-            input.addEventListener('focus', function() {
+            input.addEventListener('focus', function () {
                 if (this.value.trim()) renderOptions(this.value);
             });
 
-            input.addEventListener('blur', function() {
+            input.addEventListener('blur', function () {
                 // Delay so click on dropdown registers
-                activeTimeout = setTimeout(function() {
+                activeTimeout = setTimeout(function () {
                     dropdown.classList.remove('open');
                 }, 150);
             });
@@ -1875,9 +1933,9 @@
 
 
         // Hide all autocomplete dropdowns when tapping outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!e.target.closest('.ac-container')) {
-                document.querySelectorAll('.ac-dropdown').forEach(function(d) {
+                document.querySelectorAll('.ac-dropdown').forEach(function (d) {
                     d.classList.remove('open');
                 });
             }
