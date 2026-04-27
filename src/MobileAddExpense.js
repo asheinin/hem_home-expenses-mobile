@@ -355,7 +355,7 @@ function getCurrentMonthExpenses() {
         var sheet = ss.getSheets()[currentMonth]; // sheets[1] = January, etc.
         var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
         var values = sheet
-            .getRange(myNumbers.expenseFirstRow, 1, numRows, myNumbers.expenseAmountColumn)
+            .getRange(myNumbers.expenseFirstRow, 1, numRows, myNumbers.expensePAPColumn)
             .getValues();
 
         var expenses = [];
@@ -363,11 +363,13 @@ function getCurrentMonthExpenses() {
             var name   = (row[myNumbers.expenseDescrColumn  - 1] || '').toString().trim();
             var type   = (row[myNumbers.expenseTypeColumn   - 1] || '').toString().trim();
             var amount = row[myNumbers.expenseAmountColumn  - 1];
+            var split  = (row[myNumbers.expenceSplitColumn  - 1] || '').toString().trim() === 'Y';
+            var pap    = (row[myNumbers.expensePAPColumn    - 1] || '').toString().trim() === 'PAP';
             if (name) {
                 var amtStr = (amount !== '' && amount !== null && !isNaN(parseFloat(amount)))
                     ? '$' + parseFloat(amount).toFixed(2)
                     : '—';
-                expenses.push({ name: name, type: type, amount: amtStr });
+                expenses.push({ name: name, type: type, amount: amtStr, split: split, pap: pap });
             }
         });
 
@@ -455,6 +457,8 @@ function mobileProcessForm(
                 .flat();
 
             var existingIndex = -1;
+            var isUpdateSimilar = actionType && actionType.indexOf('_update_similar|') === 0;
+            var targetNameForUpdate = isUpdateSimilar ? actionType.split('|')[1] : null;
 
             if (actionType !== '_add_new') {
                 if (actionType === '_update') {
@@ -462,6 +466,15 @@ function mobileProcessForm(
                         var dStr = (descriptions[k] || '').toString().trim().toLowerCase();
                         var tStr = (types[k] || '').toString().trim().toLowerCase();
                         if (dStr === newExpenseItem.toLowerCase().trim() && tStr === newExpenseType.toLowerCase().trim()) {
+                            existingIndex = k;
+                            break;
+                        }
+                    }
+                } else if (isUpdateSimilar) {
+                    for (var k = 0; k < descriptions.length; k++) {
+                        var dStr = (descriptions[k] || '').toString().trim().toLowerCase();
+                        var tStr = (types[k] || '').toString().trim().toLowerCase();
+                        if (dStr === targetNameForUpdate.toLowerCase().trim() && tStr === newExpenseType.toLowerCase().trim()) {
                             existingIndex = k;
                             break;
                         }
@@ -480,10 +493,15 @@ function mobileProcessForm(
             if (existingIndex !== -1) {
                 var row = existingIndex + myNumbers.expenseFirstRow;
 
-                if (actionType === '_update') {
+                if (actionType === '_update' || isUpdateSimilar) {
                     var currentAmt = sheet.getRange(row, myNumbers.expenseAmountColumn).getValue();
                     var newTotal = (parseFloat(currentAmt) || 0) + (amount !== -1 ? amount : 0);
                     sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(newTotal);
+
+                    if (isUpdateSimilar) {
+                        var currentName = sheet.getRange(row, myNumbers.expenseDescrColumn).getValue();
+                        sheet.getRange(row, myNumbers.expenseDescrColumn).setValue(currentName + ", " + newExpenseItem);
+                    }
 
                     if (amount !== -1) {
                         if (paidByIndex == 1) { // Spouse 2 (dashSpouse1NameColumn refers to column 2 in myNumbers, or the first option)
