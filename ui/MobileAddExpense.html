@@ -1633,25 +1633,52 @@
             if (!_refLoaded || !_refExpenses.length) return false;
             var n = name.toLowerCase().trim();
             var t = type.toLowerCase().trim();
-            return _refExpenses.some(function (exp) {
-                return exp.name.toLowerCase().trim() === n &&
-                    exp.type.toLowerCase().trim() === t;
-            });
+            var newSplit = document.getElementById('splitToggle').checked;
+            var newPap = document.getElementById('papToggle').checked;
+
+            // 1. Exact match validation
+            for (var i = 0; i < _refExpenses.length; i++) {
+                var exp = _refExpenses[i];
+                if (exp.name.toLowerCase().trim() === n && exp.type.toLowerCase().trim() === t) {
+                    return { type: 'exact', exp: exp };
+                }
+            }
+
+            // 2. Similar match validation (Category + Split + PAP)
+            for (var i = 0; i < _refExpenses.length; i++) {
+                var exp = _refExpenses[i];
+                if (exp.type.toLowerCase().trim() === t && exp.split === newSplit && exp.pap === newPap) {
+                    return { type: 'similar', exp: exp };
+                }
+            }
+
+            return false;
         }
 
         var _dupAction = '';
 
-        function _showDuplicateWarning(name, type) {
+        function _showDuplicateWarning(matchResult) {
             var box = document.getElementById('alertBox');
             box.className = 'alert alert-warn';
-            box.innerHTML =
-                '⚠️ <strong>"' + _esc(name) + '"</strong> with category <strong>"' + _esc(type) + '"</strong> already exists this month.<br>' +
-                'How would you like to proceed?' +
-                '<div class="warn-actions" style="flex-wrap: wrap; gap: 8px;">' +
+            var html = '';
+
+            if (matchResult.type === 'exact') {
+                html = '⚠️ <strong>"' + _esc(matchResult.exp.name) + '"</strong> with category <strong>"' + _esc(matchResult.exp.type) + '"</strong> already exists this month.<br>' +
+                    'How would you like to proceed?';
+            } else {
+                html = '⚠️ An entry for <strong>"' + _esc(matchResult.exp.name) + '"</strong> already exists this month with the exact same Category (<strong>' + _esc(matchResult.exp.type) + '</strong>), Split, and PAP options.<br>' +
+                    'Would you like to combine them?';
+            }
+
+            var updateAction = matchResult.type === 'exact' ? "'_update'" : "'_update_similar|" + matchResult.exp.name.replace(/'/g, "\\'") + "'";
+
+            html += '<div class="warn-actions" style="flex-wrap: wrap; gap: 8px;">' +
                 '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
                 '<button class="btn-warn btn-warn-continue" style="background:#4b5563; color:white; flex-basis: 45%;" onclick="_confirmDuplicate(\'_add_new\')">Add as New</button>' +
-                '<button class="btn-warn btn-warn-continue" style="flex-basis: 45%;" onclick="_confirmDuplicate(\'_update\')">Update Existing</button>' +
+                '<button class="btn-warn btn-warn-continue" style="flex-basis: 45%;" onclick="_confirmDuplicate(' + updateAction + ')">Update Existing</button>' +
                 '</div>';
+
+            box.innerHTML = html;
             box.style.display = 'block';
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -1760,8 +1787,9 @@
                 return;
             }
 
-            if (_checkDuplicate(name, type)) {
-                _showDuplicateWarning(name, type);
+            var matchResult = _checkDuplicate(name, type);
+            if (matchResult) {
+                _showDuplicateWarning(matchResult);
                 return;
             }
 
