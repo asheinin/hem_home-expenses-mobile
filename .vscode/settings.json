@@ -1,0 +1,7 @@
+{
+    // Google Apps Script HTML files use <?= ?> and <?!= ?> scriptlet syntax
+    // which is not valid JavaScript. Disable JS validation inside HTML to
+    // suppress false-positive "Expression expected" errors.
+    "html.validate.scripts": false,
+    "javascript.validate.enable": false
+}
