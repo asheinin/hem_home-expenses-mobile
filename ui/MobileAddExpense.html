@@ -1672,9 +1672,33 @@
             document.getElementById('aiContent').innerHTML = html;
             document.getElementById('aiContent').style.display = 'block';
 
+            // Pre-assign colors based on YTD totals (highest first) so top categories get primary colors
+            var colorMap = {};
+            var colorIdx = 0;
+            var ytdEntries = [];
+            var ytdTotals = r.ytdCategoryTotals || {};
+            for (var cat in ytdTotals) {
+                ytdEntries.push({ label: cat, value: parseFloat(ytdTotals[cat]) || 0 });
+            }
+            ytdEntries.sort(function(a, b) { return b.value - a.value; });
+            ytdEntries.forEach(function(e) {
+                if (typeof colorMap[e.label] === 'undefined') {
+                    colorMap[e.label] = _BAR_PALETTE[colorIdx % _BAR_PALETTE.length];
+                    colorIdx++;
+                }
+            });
+
+            function getColor(cat) {
+                if (typeof colorMap[cat] === 'undefined') {
+                    colorMap[cat] = _BAR_PALETTE[colorIdx % _BAR_PALETTE.length];
+                    colorIdx++;
+                }
+                return colorMap[cat];
+            }
+
             // Draw charts after DOM is updated
-            _renderBarChart('barContainerMonth', r.currentMonthCategoryTotals || {});
-            _renderBarChart('barContainerYtd', r.ytdCategoryTotals || {});
+            _renderBarChart('barContainerMonth', r.currentMonthCategoryTotals || {}, getColor);
+            _renderBarChart('barContainerYtd', r.ytdCategoryTotals || {}, getColor);
         }
 
         // ── Bar chart renderer ───────────────────────
@@ -1684,7 +1708,7 @@
             '#f5576c', '#4481eb', '#0ba360', '#c471f5', '#12c2e9'
         ];
 
-        function _renderBarChart(containerId, categoryTotals) {
+        function _renderBarChart(containerId, categoryTotals, getColorFn) {
             var container = document.getElementById(containerId);
             if (!container) return;
 
@@ -1715,7 +1739,7 @@
             var html = '';
             entries.forEach(function (e, i) {
                 var pctHeight = Math.max(2, (e.value / maxVal) * 100);
-                var color = _BAR_PALETTE[i % _BAR_PALETTE.length];
+                var color = getColorFn ? getColorFn(e.label) : _BAR_PALETTE[i % _BAR_PALETTE.length];
                 
                 html += '<div class="ai-bar-col">';
                 html += '<div class="ai-bar-value">' + fmtAmt(e.value) + '</div>';
