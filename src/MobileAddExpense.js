@@ -503,16 +503,47 @@ function mobileProcessForm(
 
             var existingIndex = -1;
             var isUpdateSimilar = actionType && actionType.indexOf('_update_similar|') === 0;
+            var isAddToExisting = (actionType === '_add_to_existing');
             var targetNameForUpdate = isUpdateSimilar ? actionType.split('|')[1] : null;
 
             if (actionType !== '_add_new') {
-                if (actionType === '_update') {
+                if (actionType === '_update' || isAddToExisting) {
+                    // 1. Exact name + type match
                     for (var k = 0; k < descriptions.length; k++) {
                         var dStr = (descriptions[k] || '').toString().trim().toLowerCase();
                         var tStr = (types[k] || '').toString().trim().toLowerCase();
                         if (dStr === newExpenseItem.toLowerCase().trim() && tStr === newExpenseType.toLowerCase().trim()) {
                             existingIndex = k;
                             break;
+                        }
+                    }
+                    // 2. Name-only match (capacity-full fallback)
+                    if (existingIndex === -1 && isAddToExisting) {
+                        for (var k = 0; k < descriptions.length; k++) {
+                            var dStr = (descriptions[k] || '').toString().trim().toLowerCase();
+                            if (dStr === newExpenseItem.toLowerCase().trim()) {
+                                existingIndex = k;
+                                break;
+                            }
+                        }
+                    }
+                    // 3. Type-only match (capacity-full fallback)
+                    if (existingIndex === -1 && isAddToExisting) {
+                        for (var k = 0; k < descriptions.length; k++) {
+                            var tStr = (types[k] || '').toString().trim().toLowerCase();
+                            if (tStr === newExpenseType.toLowerCase().trim()) {
+                                existingIndex = k;
+                                break;
+                            }
+                        }
+                    }
+                    // 4. Last occupied row (capacity-full last resort)
+                    if (existingIndex === -1 && isAddToExisting) {
+                        for (var k = descriptions.length - 1; k >= 0; k--) {
+                            if ((descriptions[k] || '').toString().trim() !== '') {
+                                existingIndex = k;
+                                break;
+                            }
                         }
                     }
                 } else if (isUpdateSimilar) {
@@ -538,21 +569,23 @@ function mobileProcessForm(
             if (existingIndex !== -1) {
                 var row = existingIndex + myNumbers.expenseFirstRow;
 
-                if (actionType === '_update' || isUpdateSimilar) {
+                if (actionType === '_update' || isUpdateSimilar || isAddToExisting) {
+                    // Accumulate amount
                     var currentAmt = sheet.getRange(row, myNumbers.expenseAmountColumn).getValue();
                     var newTotal = (parseFloat(currentAmt) || 0) + (amount !== -1 ? amount : 0);
                     sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(newTotal);
 
                     if (isUpdateSimilar) {
                         var currentName = sheet.getRange(row, myNumbers.expenseDescrColumn).getValue();
-                        sheet.getRange(row, myNumbers.expenseDescrColumn).setValue(currentName + ", " + newExpenseItem);
+                        sheet.getRange(row, myNumbers.expenseDescrColumn).setValue(currentName + ', ' + newExpenseItem);
                     }
 
+                    // Accumulate who-pays columns
                     if (amount !== -1) {
-                        if (paidByIndex == 1) { // Spouse 2 (dashSpouse1NameColumn refers to column 2 in myNumbers, or the first option)
+                        if (paidByIndex == 1) {
                             var p1 = sheet.getRange(row, myNumbers.expenseSecondPayColumn).getValue();
                             sheet.getRange(row, myNumbers.expenseSecondPayColumn).setValue((parseFloat(p1) || 0) + amount);
-                        } else if (paidByIndex == 2) { // Spouse 1
+                        } else if (paidByIndex == 2) {
                             var p2 = sheet.getRange(row, myNumbers.expenseFirstPayColumn).getValue();
                             sheet.getRange(row, myNumbers.expenseFirstPayColumn).setValue((parseFloat(p2) || 0) + amount);
                         }

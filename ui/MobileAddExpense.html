@@ -1688,21 +1688,30 @@
             var box = document.getElementById('alertBox');
             box.className = 'alert alert-warn';
             var html = '';
+            var sheetFull = (currentMode === 'ot' && _monthCapacity && _monthCapacity.isFull);
 
             if (matchResult.type === 'exact') {
-                html = '⚠️ <strong>"' + _esc(matchResult.exp.name) + '"</strong> with category <strong>"' + _esc(matchResult.exp.type) + '"</strong> already exists this month.<br>' +
-                    'How would you like to proceed?';
+                html = '⚠️ <strong>"' + _esc(matchResult.exp.name) + '"</strong> with category <strong>"' + _esc(matchResult.exp.type) + '"</strong> already exists this month.<br>';
+                html += sheetFull
+                    ? '⛔ Monthly limit reached — all ' + _monthCapacity.totalSlots + ' rows are used. Only existing rows can be updated.'
+                    : 'How would you like to proceed?';
             } else {
-                html = '⚠️ An entry for <strong>"' + _esc(matchResult.exp.name) + '"</strong> already exists this month with the exact same Category (<strong>' + _esc(matchResult.exp.type) + '</strong>), Split, and PAP options.<br>' +
-                    'Would you like to combine them?';
+                html = '⚠️ An entry for <strong>"' + _esc(matchResult.exp.name) + '"</strong> already exists this month with the exact same Category (<strong>' + _esc(matchResult.exp.type) + '</strong>), Split, and PAP options.<br>';
+                html += sheetFull
+                    ? '⛔ Monthly limit reached — all ' + _monthCapacity.totalSlots + ' rows are used. Only existing rows can be updated.'
+                    : 'Would you like to combine them?';
             }
 
             var updateAction = matchResult.type === 'exact' ? "'_update'" : "'_update_similar|" + matchResult.exp.name.replace(/'/g, "\\'") + "'";
 
             html += '<div class="warn-actions" style="flex-wrap: wrap; gap: 8px;">' +
-                '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
-                '<button class="btn-warn btn-warn-continue" style="background:#4b5563; color:white; flex-basis: 45%;" onclick="_confirmDuplicate(\'_add_new\')">Add as New</button>' +
-                '<button class="btn-warn btn-warn-continue" style="flex-basis: 45%;" onclick="_confirmDuplicate(' + updateAction + ')">Update Existing</button>' +
+                '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>';
+            if (!sheetFull) {
+                html += '<button class="btn-warn btn-warn-continue" style="background:#4b5563; color:white; flex-basis: 45%;" onclick="_confirmDuplicate(\'_add_new\')">Add as New</button>';
+            }
+            html +=
+                '<button class="btn-warn btn-warn-continue" style="flex-basis: 45%;" onclick="_confirmDuplicate(' + updateAction + ')">' +
+                (sheetFull ? 'Add to Existing Row' : 'Update Existing') + '</button>' +
                 '</div>';
 
             box.innerHTML = html;
@@ -1733,7 +1742,7 @@
                 'You can add this expense to an existing row, or cancel.<br>' +
                 '<div class="warn-actions">' +
                 '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
-                '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate(\'_update\')">Add to Existing Row</button>' +
+                '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate(\'_add_to_existing\')">Add to Existing Row</button>' +
                 '</div>';
             box.innerHTML = html;
             box.style.display = 'block';
