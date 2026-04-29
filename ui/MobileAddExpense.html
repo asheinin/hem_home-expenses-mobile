@@ -1104,6 +1104,33 @@
             color: var(--primary-dark);
         }
 
+        /* ── Rows-left badge (beside mode description) ── */
+        .rows-left-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(255, 255, 255, 0.22);
+            border-radius: 100px;
+            padding: 2px 9px;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.92);
+            margin-left: 8px;
+            vertical-align: middle;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .rows-left-badge.warn {
+            background: rgba(255, 200, 60, 0.35);
+            color: #ffe066;
+        }
+
+        .rows-left-badge.danger {
+            background: rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+        }
+
         /* ── Segmented control (Who Paid) ── */
         .seg-control {
             display: flex;
@@ -1192,7 +1219,7 @@
                 <div class="mode-tab active" id="tab-ot" onclick="setMode('ot')">One-Time</div>
                 <div class="mode-tab" id="tab-rm" onclick="setMode('rm')">Recurrent →</div>
             </div>
-            <div class="mode-desc" id="modeDesc">Adds expense to the current month only</div>
+            <div class="mode-desc" id="modeDesc">Adds expense to the current month only<span id="rowsLeftBadge" class="rows-left-badge" style="display:none"></span></div>
         </div>
 
         <!-- Body -->
@@ -1696,6 +1723,34 @@
             _doSubmit();
         }
 
+        // ── Month capacity (rows left) ─────────────────────────────────────────
+        var _monthCapacity = null; // { totalSlots, usedSlots, emptySlots, isFull }
+
+        function _loadMonthCapacity() {
+            google.script.run
+                .withSuccessHandler(function (res) {
+                    if (!res || !res.success) return;
+                    _monthCapacity = res;
+                    _updateRowsBadge();
+                })
+                .withFailureHandler(function () {})
+                .getMonthCapacity();
+        }
+
+        function _updateRowsBadge() {
+            var badge = document.getElementById('rowsLeftBadge');
+            if (!_monthCapacity) { badge.style.display = 'none'; return; }
+            var left = _monthCapacity.emptySlots;
+            badge.textContent = left + ' row' + (left === 1 ? '' : 's') + ' left';
+            badge.className = 'rows-left-badge';
+            if (left === 0) badge.classList.add('danger');
+            else if (left <= 5) badge.classList.add('warn');
+            badge.style.display = 'inline-flex';
+        }
+
+        // Load capacity on page start
+        _loadMonthCapacity();
+
         // ── Mode ─────────────────────────────────────────────────────────────────
         var currentMode = 'ot';
         var modeDescriptions = {
@@ -1707,7 +1762,15 @@
             currentMode = mode;
             document.getElementById('tab-ot').classList.toggle('active', mode === 'ot');
             document.getElementById('tab-rm').classList.toggle('active', mode === 'rm');
-            document.getElementById('modeDesc').textContent = modeDescriptions[mode];
+            // Rebuild the text content without clobbering the badge span
+            var desc = document.getElementById('modeDesc');
+            // Clear text nodes only (leave child elements)
+            Array.from(desc.childNodes).forEach(function (n) {
+                if (n.nodeType === Node.TEXT_NODE) desc.removeChild(n);
+            });
+            desc.insertBefore(document.createTextNode(modeDescriptions[mode]), desc.firstChild);
+            // Show badge only in OT mode
+            document.getElementById('rowsLeftBadge').style.display = (mode === 'ot') ? 'inline-flex' : 'none';
         }
 
         // ── PAP / Paid mutual exclusivity ─────────────────────────────────────────
@@ -1761,6 +1824,10 @@
             if (amount !== '' && isNaN(parseFloat(amount))) {
                 errors.push('Amount must be a valid number (e.g. 12.50).');
                 markError('expenseAmount');
+            }
+            // Capacity check — block new-row OT adds when sheet is full
+            if (errors.length === 0 && currentMode === 'ot' && _monthCapacity && _monthCapacity.isFull) {
+                errors.push('⛔ This month\'s expense sheet is full (' + _monthCapacity.totalSlots + '/' + _monthCapacity.totalSlots + ' rows used). No empty rows available.');
             }
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
 
@@ -1885,6 +1952,7 @@
             _refExpenses = [];
             _loadRefData(); // Re-fetch baseline info automatically
             refreshSummary(); // Auto-refresh summary banner after add
+            _loadMonthCapacity(); // Refresh rows-left badge after add
             // Scroll back to top so user sees form reset
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }

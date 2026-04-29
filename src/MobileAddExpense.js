@@ -343,6 +343,51 @@ function autoSwitchToNewYearFile() {
 // ============================================================================
 
 /**
+ * Returns capacity info for the current month's expense range.
+ * Used to display "X rows left" and block submission when the sheet is full.
+ * @returns {{success: boolean, totalSlots: number, usedSlots: number, emptySlots: number, isFull: boolean}}
+ */
+function getMonthCapacity() {
+    try {
+        var myNumbers = new staticNumbers();
+        var ss = _getSpreadsheet();
+        var currentMonth = new Date().getMonth() + 1; // 1-based
+        var sheet = ss.getSheets()[currentMonth];
+        var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
+        var values = sheet
+            .getRange(myNumbers.expenseFirstRow, 1, numRows, myNumbers.expenseAmountColumn)
+            .getValues();
+
+        var descrIdx = myNumbers.expenseDescrColumn - 1;
+        var amtIdx   = myNumbers.expenseAmountColumn - 1;
+
+        var usedSlots  = 0;
+        var emptySlots = 0;
+
+        values.forEach(function (row) {
+            var hasDescr = row[descrIdx] !== '' && row[descrIdx] != null;
+            var hasAmt   = row[amtIdx]   !== '' && row[amtIdx]   != null;
+            if (hasDescr || hasAmt) {
+                usedSlots++;
+            } else {
+                emptySlots++;
+            }
+        });
+
+        return {
+            success:    true,
+            totalSlots: numRows,
+            usedSlots:  usedSlots,
+            emptySlots: emptySlots,
+            isFull:     emptySlots === 0
+        };
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, totalSlots: 0, usedSlots: 0, emptySlots: 0, isFull: false };
+    }
+}
+
+/**
  * Returns all expenses for the current month.
  * @returns {{success: boolean, expenses: Array<{name:string, type:string, amount:string}>, month: string}}
  */
