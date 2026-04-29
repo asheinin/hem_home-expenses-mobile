@@ -838,6 +838,77 @@
             font-weight: 600;
         }
 
+        /* ── Pie charts ── */
+        .ai-pie-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .ai-pie-card {
+            background: #f8f9ff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 10px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-pie-card-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .ai-pie-canvas {
+            display: block;
+        }
+
+        .ai-pie-legend {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 130px;
+            overflow-y: auto;
+        }
+
+        .ai-pie-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .ai-pie-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .ai-pie-legend-label {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .ai-pie-legend-pct {
+            font-weight: 700;
+            color: var(--primary-dark);
+            flex-shrink: 0;
+        }
+
         /* ── Reference bottom sheet ── */
         .ref-overlay {
             display: none;
@@ -1539,6 +1610,17 @@
             html += '</div>';
             html += '</div>'; // /stat-grid
 
+            // ── Category Pie Charts (placeholder divs — drawn by Canvas after inject) ──
+            html += '<div class="ai-section-title">🥧 Spend by Category</div>';
+            html += '<div class="ai-pie-row">';
+            html += '<div class="ai-pie-card"><div class="ai-pie-card-title">' + _esc(r.currentMonth || '') + ' Month</div>';
+            html += '<canvas class="ai-pie-canvas" id="pieCanvasMonth" width="130" height="130"></canvas>';
+            html += '<div class="ai-pie-legend" id="pieLegendMonth"></div></div>';
+            html += '<div class="ai-pie-card"><div class="ai-pie-card-title">Year to Date</div>';
+            html += '<canvas class="ai-pie-canvas" id="pieCanvasYtd" width="130" height="130"></canvas>';
+            html += '<div class="ai-pie-legend" id="pieLegendYtd"></div></div>';
+            html += '</div>';
+
             // ── Expense Anomalies ──
             if (r.spikes && r.spikes.hasAnomalies) {
                 html += '<div class="ai-section-title">⚠️ Expense Anomalies</div>';
@@ -1569,6 +1651,93 @@
 
             document.getElementById('aiContent').innerHTML = html;
             document.getElementById('aiContent').style.display = 'block';
+
+            // Draw charts after DOM is updated
+            _renderPieChart('pieCanvasMonth', 'pieLegendMonth', r.currentMonthCategoryTotals || {}, r.currentMonth + ' Month');
+            _renderPieChart('pieCanvasYtd', 'pieLegendYtd', r.ytdCategoryTotals || {}, 'Year to Date');
+        }
+
+        // ── Pie chart renderer (Canvas 2D, no dependencies) ───────────────────────
+        var _PIE_PALETTE = [
+            '#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b',
+            '#fa709a', '#fee140', '#30cfd0', '#a18cd1', '#fda085',
+            '#f5576c', '#4481eb', '#0ba360', '#c471f5', '#12c2e9'
+        ];
+
+        function _renderPieChart(canvasId, legendId, categoryTotals, title) {
+            var canvas = document.getElementById(canvasId);
+            var legendEl = document.getElementById(legendId);
+            if (!canvas || !legendEl) return;
+
+            // Build sorted data array
+            var entries = [];
+            var grandTotal = 0;
+            for (var cat in categoryTotals) {
+                var v = parseFloat(categoryTotals[cat]) || 0;
+                if (v > 0) { entries.push({ label: cat, value: v }); grandTotal += v; }
+            }
+            if (!entries.length || grandTotal === 0) {
+                canvas.style.display = 'none';
+                legendEl.innerHTML = '<span style="font-size:11px;color:var(--muted)">No data</span>';
+                return;
+            }
+            entries.sort(function (a, b) { return b.value - a.value; });
+
+            // Draw pie
+            var ctx = canvas.getContext('2d');
+            var W = canvas.width;
+            var H = canvas.height;
+            var cx = W / 2, cy = H / 2;
+            var r = Math.min(cx, cy) - 4;
+            var startAngle = -Math.PI / 2;
+
+            ctx.clearRect(0, 0, W, H);
+
+            // Gap between slices (in radians)
+            var GAP = entries.length > 1 ? 0.03 : 0;
+
+            entries.forEach(function (e, i) {
+                var slice = (e.value / grandTotal) * (Math.PI * 2);
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, startAngle + GAP / 2, startAngle + slice - GAP / 2);
+                ctx.closePath();
+                ctx.fillStyle = _PIE_PALETTE[i % _PIE_PALETTE.length];
+                ctx.fill();
+                startAngle += slice;
+            });
+
+            // Inner white circle (donut)
+            ctx.beginPath();
+            ctx.arc(cx, cy, r * 0.48, 0, Math.PI * 2);
+            ctx.fillStyle = '#f8f9ff';
+            ctx.fill();
+
+            // Centre label: number of categories
+            ctx.fillStyle = '#4b5563';
+            ctx.font = 'bold 13px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(entries.length, cx, cy - 6);
+            ctx.font = '9px Inter, sans-serif';
+            ctx.fillStyle = '#9ca3af';
+            ctx.fillText('cats', cx, cy + 7);
+
+            // Build legend
+            var fmtAmt = function (v) {
+                return '$' + v.toLocaleString('en-CA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            };
+            var legendHtml = '';
+            entries.forEach(function (e, i) {
+                var pctVal = ((e.value / grandTotal) * 100).toFixed(1);
+                legendHtml +=
+                    '<div class="ai-pie-legend-item">' +
+                    '<div class="ai-pie-legend-dot" style="background:' + _PIE_PALETTE[i % _PIE_PALETTE.length] + '"></div>' +
+                    '<span class="ai-pie-legend-label" title="' + _esc(e.label) + '">' + _esc(e.label) + '</span>' +
+                    '<span class="ai-pie-legend-pct">' + pctVal + '%</span>' +
+                    '</div>';
+            });
+            legendEl.innerHTML = legendHtml;
         }
 
         // ── Current-month reference data ──────────────────────────────────────────

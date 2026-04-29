@@ -131,6 +131,20 @@ function runMobileExpenseAnalysis() {
 
         var aiAnalysis = _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis);
 
+        // ── YTD category totals (sum Jan → current month) ────────────────────
+        var ytdCategoryTotals = {};
+        var currentSS = _mobileGetSpreadsheetForYear(currentYear);
+        if (currentSS) {
+            for (var m = 0; m <= currentMonthIndex; m++) {
+                var mStats = _mobileGetMonthStats(currentSS, months[m], currentYear, myNumbers);
+                if (mStats && mStats.categoryTotals) {
+                    for (var cat in mStats.categoryTotals) {
+                        ytdCategoryTotals[cat] = (ytdCategoryTotals[cat] || 0) + mStats.categoryTotals[cat];
+                    }
+                }
+            }
+        }
+
         var results = {
             timestamp: now.toISOString(),
             currentMonth: currentMonthName,
@@ -138,7 +152,9 @@ function runMobileExpenseAnalysis() {
             comparison: comparisonData,
             forecast: forecastData,
             spikes: spikeAnalysis,
-            aiInsights: aiAnalysis
+            aiInsights: aiAnalysis,
+            currentMonthCategoryTotals: (comparisonData.current && comparisonData.current.categoryTotals) || {},
+            ytdCategoryTotals: ytdCategoryTotals
         };
 
         return { success: true, results: results };
@@ -147,6 +163,7 @@ function runMobileExpenseAnalysis() {
         return { success: false, message: err.toString() };
     }
 }
+
 
 
 // ============================================================================
