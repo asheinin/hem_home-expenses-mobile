@@ -84,14 +84,16 @@ function _getBase64Manifest() {
         "name": "HomeExpenses",
         "icons": [
             {
-                "src": "https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD",
+                "src": "https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD",
                 "type": "image/png",
-                "sizes": "192x192"
+                "sizes": "192x192",
+                "purpose": "any maskable"
             },
             {
-                "src": "https://drive.google.com/uc?export=view&id=1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD",
+                "src": "https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD",
                 "type": "image/png",
-                "sizes": "512x512"
+                "sizes": "512x512",
+                "purpose": "any maskable"
             }
         ],
         "start_url": ScriptApp.getService().getUrl(),
