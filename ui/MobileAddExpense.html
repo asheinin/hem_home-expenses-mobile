@@ -1723,6 +1723,23 @@
             _doSubmit();
         }
 
+        // ── Capacity-full warning (OT mode, no empty rows) ────────────────────────
+        function _showCapacityFullWarning() {
+            var box = document.getElementById('alertBox');
+            box.className = 'alert alert-warn';
+            var used = _monthCapacity ? _monthCapacity.totalSlots : '?';
+            var html =
+                '⛔ <strong>Monthly limit reached</strong> — all ' + used + ' expense rows are used.<br>' +
+                'You can add this expense to an existing row, or cancel.<br>' +
+                '<div class="warn-actions">' +
+                '<button class="btn-warn btn-warn-cancel" onclick="_cancelDuplicate()">Cancel</button>' +
+                '<button class="btn-warn btn-warn-continue" onclick="_confirmDuplicate(\'_update\')">Add to Existing Row</button>' +
+                '</div>';
+            box.innerHTML = html;
+            box.style.display = 'block';
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
         // ── Month capacity (rows left) ─────────────────────────────────────────
         var _monthCapacity = null; // { totalSlots, usedSlots, emptySlots, isFull }
 
@@ -1817,7 +1834,7 @@
             var type = document.getElementById('expenseType').value.trim();
             var amount = getSignedAmount();
 
-            // Client-side validation
+            // ① Field validation — always runs first
             var errors = [];
             if (!name) { errors.push('Expense Name is required.'); markError('expenseName'); }
             if (!type) { errors.push('Category is required.'); markError('expenseType'); }
@@ -1825,30 +1842,32 @@
                 errors.push('Amount must be a valid number (e.g. 12.50).');
                 markError('expenseAmount');
             }
-            // Capacity check — block new-row OT adds when sheet is full
-            if (errors.length === 0 && currentMode === 'ot' && _monthCapacity && _monthCapacity.isFull) {
-                errors.push('⛔ This month\'s expense sheet is full (' + _monthCapacity.totalSlots + '/' + _monthCapacity.totalSlots + ' rows used). No empty rows available.');
-            }
             if (errors.length) { showAlert(errors.join(' '), 'error'); return; }
 
-            // Duplicate check (synchronously if already loaded, async fallback if not)
+            // ② Duplicate check (synchronously if already loaded, async fallback if not)
             if (!_refLoaded) {
                 setLoading(true);
                 google.script.run
                     .withSuccessHandler(function (result) {
                         _refLoaded = true;
                         if (result && result.success) _refExpenses = result.expenses;
-
-                        if (_checkDuplicate(name, type)) {
-                            setLoading(false);
-                            _showDuplicateWarning(name, type);
+                        setLoading(false);
+                        var match = _checkDuplicate(name, type);
+                        if (match) {
+                            _showDuplicateWarning(match);
+                        } else if (currentMode === 'ot' && _monthCapacity && _monthCapacity.isFull) {
+                            _showCapacityFullWarning();
                         } else {
                             _doSubmit();
                         }
                     })
                     .withFailureHandler(function () {
-                        // Fallback to submitting anyway if load fails
-                        _doSubmit();
+                        // Fallback: skip duplicate check, still respect capacity
+                        if (currentMode === 'ot' && _monthCapacity && _monthCapacity.isFull) {
+                            _showCapacityFullWarning();
+                        } else {
+                            _doSubmit();
+                        }
                     })
                     .getCurrentMonthExpenses();
                 return;
@@ -1857,6 +1876,12 @@
             var matchResult = _checkDuplicate(name, type);
             if (matchResult) {
                 _showDuplicateWarning(matchResult);
+                return;
+            }
+
+            // ③ Capacity check — only reached when no field errors and no duplicate
+            if (currentMode === 'ot' && _monthCapacity && _monthCapacity.isFull) {
+                _showCapacityFullWarning();
                 return;
             }
 
