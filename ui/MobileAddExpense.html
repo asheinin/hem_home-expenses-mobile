@@ -863,17 +863,21 @@
         }
 
         .ai-bar-container {
+            width: 100%;
             display: flex;
             align-items: stretch;
             gap: 12px;
             height: 160px;
-            overflow-x: auto;
+            overflow-x: scroll;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            overscroll-behavior-x: contain;
             padding-bottom: 8px;
         }
 
         /* Custom scrollbar for horizontal area */
         .ai-bar-container::-webkit-scrollbar {
-            height: 6px;
+            height: 8px;
         }
         .ai-bar-container::-webkit-scrollbar-track {
             background: #e2e8f0;
