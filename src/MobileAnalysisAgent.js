@@ -129,7 +129,13 @@ function runMobileExpenseAnalysis() {
             comparisonData.current, comparisonData.yearAgo, myNumbers
         );
 
-        var aiAnalysis = _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis);
+        var useAIToggleStr = PropertiesService.getScriptProperties().getProperty('USE_AI_TOGGLE');
+        var aiEnabled = useAIToggleStr === null ? true : (useAIToggleStr === 'true');
+
+        var aiAnalysis = null;
+        if (aiEnabled) {
+            aiAnalysis = _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis);
+        }
 
         // ── YTD category totals (sum Jan → current month) ────────────────────
         var ytdCategoryTotals = {};
@@ -154,7 +160,8 @@ function runMobileExpenseAnalysis() {
             spikes: spikeAnalysis,
             aiInsights: aiAnalysis,
             currentMonthCategoryTotals: (comparisonData.current && comparisonData.current.categoryTotals) || {},
-            ytdCategoryTotals: ytdCategoryTotals
+            ytdCategoryTotals: ytdCategoryTotals,
+            aiEnabled: aiEnabled
         };
 
         return { success: true, results: results };

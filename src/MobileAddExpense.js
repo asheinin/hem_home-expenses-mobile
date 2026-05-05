@@ -214,8 +214,11 @@ function _serveSettings() {
     }
 
     var template = HtmlService.createTemplateFromFile('ui/Settings');
+    var useAIToggleStr = props.getProperty('USE_AI_TOGGLE');
+    template.useAIToggle = useAIToggleStr === null ? true : (useAIToggleStr === 'true');
     template.currentId = currentId;
     template.currentName = currentName;
+    template.geminiApiKey = props.getProperty('GEMINI_API_KEY') || '';
     template.autoSwitchInstalled = _autoSwitchTriggerInstalled();
     template.nextYear = new Date().getFullYear() + 1;
     template.manifestBase64 = _getBase64Manifest();
@@ -309,7 +312,40 @@ function getSettings() {
     if (id) {
         try { name = SpreadsheetApp.openById(id).getName(); } catch (e) { name = '(not accessible)'; }
     }
-    return { id: id, name: name, autoSwitchInstalled: _autoSwitchTriggerInstalled() };
+    var useAIToggleStr = PropertiesService.getScriptProperties().getProperty('USE_AI_TOGGLE');
+    var useAIToggle = useAIToggleStr === null ? true : (useAIToggleStr === 'true');
+    return { id: id, name: name, autoSwitchInstalled: _autoSwitchTriggerInstalled(), geminiApiKey: PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || '', useAIToggle: useAIToggle };
+}
+
+/**
+ * Save Gemini API Key configuration.
+ * @param {string} key API Key
+ * @returns {{success: boolean, message: string}}
+ */
+function saveGeminiApiKey(key) {
+    try {
+        key = (key || '').trim();
+        PropertiesService.getScriptProperties().setProperty('GEMINI_API_KEY', key);
+        return { success: true, message: 'Gemini API key saved successfully.' };
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, message: 'Unexpected error: ' + err.toString() };
+    }
+}
+
+/**
+ * Toggle AI Insights on/off.
+ * @param {boolean} enabled 
+ * @returns {{success: boolean, message: string}}
+ */
+function setUseAIToggle(enabled) {
+    try {
+        PropertiesService.getScriptProperties().setProperty('USE_AI_TOGGLE', enabled ? 'true' : 'false');
+        return { success: true, message: enabled ? 'AI Insights enabled.' : 'AI Insights disabled.' };
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, message: 'Unexpected error: ' + err.toString() };
+    }
 }
 
 // ============================================================================

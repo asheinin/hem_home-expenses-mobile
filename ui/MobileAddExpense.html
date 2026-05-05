@@ -898,11 +898,11 @@
         }
 
         .ai-bar-value {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             color: var(--text);
             margin-bottom: 6px;
-            height: 12px;
+            height: 14px;
             text-align: center;
         }
 
@@ -922,11 +922,11 @@
         }
 
         .ai-bar-label {
-            font-size: 9px;
+            font-size: 11px;
             color: var(--muted);
             text-align: center;
             margin-top: 8px;
-            height: 24px;
+            height: 28px;
             line-height: 1.2;
             overflow: hidden;
             display: -webkit-box;
@@ -1662,7 +1662,9 @@
 
             // ── AI Insights ──
             html += '<div class="ai-section-title">🧠 AI Insights</div>';
-            if (r.aiInsights) {
+            if (r.aiEnabled === false) {
+                html += '<div style="color: red; font-weight: 500; margin-bottom: 15px; padding: 0 15px;">To view AI Insights, enable AI toggle in settings</div>';
+            } else if (r.aiInsights) {
                 html += '<div class="ai-insights-box">' + r.aiInsights + '</div>';
             } else {
                 html += '<div class="ai-empty-state">';

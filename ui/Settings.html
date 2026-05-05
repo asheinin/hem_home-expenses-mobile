@@ -460,6 +460,48 @@
 
             <div class="divider"></div>
 
+            <!-- ── Gemini API Key ── -->
+            <div class="section">
+                <div class="section-title">Gemini API Key</div>
+
+                <div id="apiKeyAlert" class="alert"></div>
+
+                <div class="form-group">
+                    <label class="field-label">API Key for AI Analytics</label>
+                    <input type="password" id="geminiApiKeyInput" placeholder="Paste your Gemini API key here"
+                        value="<?= geminiApiKey ?>">
+                    <p class="hint">
+                        Required for AI-powered monthly summaries and insights.
+                    </p>
+                </div>
+                <button class="btn btn-primary" id="saveApiKeyBtn" onclick="saveApiKey()">
+                    <div class="spinner" id="saveApiKeySpinner"></div>
+                    <span id="saveApiKeyBtnText">Save API Key</span>
+                </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ── Toggle AI Insights ── -->
+            <div class="section">
+                <div class="section-title">AI Expense Analysis</div>
+                <div class="trigger-card">
+                    <div class="trigger-row">
+                        <div class="trigger-info">
+                            <div class="trigger-title">Enable AI Insights</div>
+                            <div class="trigger-sub">Use Gemini to generate insights on your spending.</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="useAIToggleInput" <?= useAIToggle ? 'checked' : '' ?> onchange="toggleAIInsights(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div id="aiToggleAlert" class="alert" style="margin-top:12px;"></div>
+            </div>
+
+            <div class="divider"></div>
+
             <!-- ── Auto year-switch trigger ── -->
             <div class="section">
                 <div class="section-title">Auto Year-Switch</div>
@@ -522,6 +564,40 @@
                     showAlert('configAlert', '❌ ' + err.message, 'error');
                 })
                 .saveSpreadsheetConfig(input);
+        }
+
+        // ── Connect Gemini API Key ────────────────────────────────────────────────
+        function saveApiKey() {
+            var input = document.getElementById('geminiApiKeyInput').value.trim();
+            
+            setLoading('saveApiKeyBtn', 'saveApiKeySpinner', 'saveApiKeyBtnText', true, 'Saving…');
+
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    setLoading('saveApiKeyBtn', 'saveApiKeySpinner', 'saveApiKeyBtnText', false, 'Save API Key');
+                    if (r.success) {
+                        showAlert('apiKeyAlert', '✅ ' + r.message, 'success');
+                    } else {
+                        showAlert('apiKeyAlert', '⚠️ ' + r.message, 'error');
+                    }
+                })
+                .withFailureHandler(function (err) {
+                    setLoading('saveApiKeyBtn', 'saveApiKeySpinner', 'saveApiKeyBtnText', false, 'Save API Key');
+                    showAlert('apiKeyAlert', '❌ ' + err.message, 'error');
+                })
+                .saveGeminiApiKey(input);
+        }
+
+        // ── Toggle AI Insights ────────────────────────────────────────────────────
+        function toggleAIInsights(enabled) {
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    showAlert('aiToggleAlert', '✅ ' + r.message, 'success');
+                })
+                .withFailureHandler(function (err) {
+                    showAlert('aiToggleAlert', '❌ ' + err.message, 'error');
+                })
+                .setUseAIToggle(enabled);
         }
 
         // ── Toggle auto-switch trigger ────────────────────────────────────────────
