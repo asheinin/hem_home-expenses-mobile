@@ -17,8 +17,10 @@
     <!-- App Icons / PWA Manifest -->
     <link rel="manifest" href="data:application/manifest+json;base64,<?= manifestBase64 ?>">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD">
     <style>
         :root {
             --primary: #667eea;
@@ -492,7 +494,8 @@
                             <div class="trigger-sub">Use Gemini to generate insights on your spending.</div>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" id="useAIToggleInput" <?= useAIToggle ? 'checked' : '' ?> onchange="toggleAIInsights(this.checked)">
+                            <input type="checkbox" id="useAIToggleInput" <?=useAIToggle ? 'checked' : '' ?>
+                            onchange="toggleAIInsights(this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -529,7 +532,7 @@
                         ✅ Active — will auto-switch on 1 Jan
                         <?= nextYear ?>
                         <? } else { ?>
-                        ○ Disabled
+                        ⚠️ Disabled
                         <? } ?>
                     </div>
                 </div>
@@ -569,7 +572,7 @@
         // ── Connect Gemini API Key ────────────────────────────────────────────────
         function saveApiKey() {
             var input = document.getElementById('geminiApiKeyInput').value.trim();
-            
+
             setLoading('saveApiKeyBtn', 'saveApiKeySpinner', 'saveApiKeyBtnText', true, 'Saving…');
 
             google.script.run
@@ -610,7 +613,7 @@
                         statusEl.className = 'trigger-status ' + (r.installed ? 'on' : 'off');
                         statusEl.textContent = r.installed
                             ? '✅ Active — will auto-switch on 1 Jan'
-                            : '○ Disabled';
+                            : '⚠️ Disabled';
                         document.getElementById('autoSwitchToggle').checked = r.installed;
                     } else {
                         showAlert('triggerAlert', '⚠️ ' + r.message, 'error');
