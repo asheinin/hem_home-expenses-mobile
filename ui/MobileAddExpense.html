@@ -713,6 +713,10 @@
             color: var(--text);
         }
 
+        .ai-stat-value.large {
+            font-size: 20px;
+        }
+
         .ai-stat-sub {
             font-size: 11px;
             color: var(--muted);
@@ -879,10 +883,12 @@
         .ai-bar-container::-webkit-scrollbar {
             height: 8px;
         }
+
         .ai-bar-container::-webkit-scrollbar-track {
             background: #e2e8f0;
             border-radius: 4px;
         }
+
         .ai-bar-container::-webkit-scrollbar-thumb {
             background: #9ca3af;
             border-radius: 4px;
@@ -1316,7 +1322,8 @@
                 <div class="mode-tab active" id="tab-ot" onclick="setMode('ot')">One-Time</div>
                 <div class="mode-tab" id="tab-rm" onclick="setMode('rm')">Recurrent →</div>
             </div>
-            <div class="mode-desc" id="modeDesc">Adds expense to the current month only<span id="rowsLeftBadge" class="rows-left-badge" style="display:none"></span></div>
+            <div class="mode-desc" id="modeDesc">Adds expense to the current month only<span id="rowsLeftBadge"
+                    class="rows-left-badge" style="display:none"></span></div>
         </div>
 
         <!-- Body -->
@@ -1593,10 +1600,27 @@
 
             var html = '';
 
-            // ── Stats grid ──
+            // ── Annual Forecast ──
+            html += '<div class="ai-section-title">📈 Annual Forecast</div>';
             html += '<div class="ai-stat-grid">';
             html += '<div class="ai-stat-card">';
-            html += '<div class="ai-stat-label">Actual Spend to Date</div>';
+            html += '<div class="ai-stat-label">YTD Posted</div>';
+            html += '<div class="ai-stat-value large">' + fmt(fc.ytdPosted) + '</div>';
+            html += '<div class="ai-stat-sub">' + fc.monthsCompleted + ' months completed</div>';
+            html += '</div>';
+
+            html += '<div class="ai-stat-card">';
+            html += '<div class="ai-stat-label">Projected Annual</div>';
+            html += '<div class="ai-stat-value large">' + fmt(fc.annualForecast) + '</div>';
+            html += '<div class="ai-stat-sub">vs last year: ' + pct(fc.vsLastYear ? fc.vsLastYear.percentChange : null) + '</div>';
+            html += '</div>';
+            html += '</div>'; // /stat-grid
+
+            // ── Stats grid ──
+            html += '<div class="ai-section-title">📅 Current Month Spending</div>';
+            html += '<div class="ai-stat-grid">';
+            html += '<div class="ai-stat-card">';
+            html += '<div class="ai-stat-label">Actual Spend This Month</div>';
             html += '<div class="ai-stat-value">' + fmt(proj.actualSpendToDate) + '</div>';
             html += '<div class="ai-stat-sub">Day ' + proj.currentDay + ' of ' + proj.daysInMonth + '</div>';
             html += '</div>';
@@ -1620,21 +1644,7 @@
             html += '</div>';
             html += '</div>'; // /stat-grid
 
-            // ── Annual Forecast ──
-            html += '<div class="ai-section-title">📈 Annual Forecast</div>';
-            html += '<div class="ai-stat-grid">';
-            html += '<div class="ai-stat-card">';
-            html += '<div class="ai-stat-label">YTD Posted</div>';
-            html += '<div class="ai-stat-value">' + fmt(fc.ytdPosted) + '</div>';
-            html += '<div class="ai-stat-sub">' + fc.monthsCompleted + ' months completed</div>';
-            html += '</div>';
 
-            html += '<div class="ai-stat-card">';
-            html += '<div class="ai-stat-label">Projected Annual</div>';
-            html += '<div class="ai-stat-value">' + fmt(fc.annualForecast) + '</div>';
-            html += '<div class="ai-stat-sub">vs last year: ' + pct(fc.vsLastYear ? fc.vsLastYear.percentChange : null) + '</div>';
-            html += '</div>';
-            html += '</div>'; // /stat-grid
 
             // ── Category Bar Charts ──
             html += '<div class="ai-section-title">📊 Spend by Category</div>';
@@ -1686,8 +1696,8 @@
             for (var cat in ytdTotals) {
                 ytdEntries.push({ label: cat, value: parseFloat(ytdTotals[cat]) || 0 });
             }
-            ytdEntries.sort(function(a, b) { return b.value - a.value; });
-            ytdEntries.forEach(function(e) {
+            ytdEntries.sort(function (a, b) { return b.value - a.value; });
+            ytdEntries.forEach(function (e) {
                 if (typeof colorMap[e.label] === 'undefined') {
                     colorMap[e.label] = _BAR_PALETTE[colorIdx % _BAR_PALETTE.length];
                     colorIdx++;
@@ -1746,7 +1756,7 @@
             }
 
             var maxVal = 0;
-            finalEntries.forEach(function(e) {
+            finalEntries.forEach(function (e) {
                 if (e.value > maxVal) maxVal = e.value;
             });
 
@@ -1761,7 +1771,7 @@
             finalEntries.forEach(function (e, i) {
                 var pctHeight = Math.max(2, (e.value / maxVal) * 100);
                 var color = (e.label === 'Others') ? '#9ca3af' : (getColorFn ? getColorFn(e.label) : _BAR_PALETTE[i % _BAR_PALETTE.length]);
-                
+
                 html += '<div class="ai-bar-col">';
                 html += '<div class="ai-bar-value">' + fmtAmt(e.value) + '</div>';
                 html += '<div class="ai-bar-fill-wrapper">';
@@ -1961,7 +1971,7 @@
                     _monthCapacity = res;
                     _updateRowsBadge();
                 })
-                .withFailureHandler(function () {})
+                .withFailureHandler(function () { })
                 .getMonthCapacity();
         }
 
