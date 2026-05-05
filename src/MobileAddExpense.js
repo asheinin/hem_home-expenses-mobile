@@ -292,7 +292,7 @@ function setAutoSwitchTrigger(install) {
                 .onMonthDay(1)
                 .atHour(6)   // Runs on the 1st of every month at 6 AM
                 .create();
-            return { success: true, installed: true, message: 'Auto-switch enabled. On January 1st the app will automatically find and connect to the new Home Expenses file.' };
+            return { success: true, installed: true, message: 'Auto-switch enabled.' };
         } else {
             return { success: true, installed: false, message: 'Auto-switch disabled.' };
         }

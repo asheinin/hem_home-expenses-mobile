@@ -484,7 +484,9 @@
                         </label>
                     </div>
                 </div>
-                <div id="aiToggleAlert" class="alert" style="margin-top:12px;"></div>
+                <div id="aiToggleAlert" class="alert alert-<?= useAIToggle ? 'success' : 'info' ?>" style="margin-top:12px; display:block;">
+                    <?= useAIToggle ? '✅ AI Insights enabled.' : '○ AI Insights disabled.' ?>
+                </div>
             </div>
 
             <div class="divider"></div>
@@ -514,7 +516,9 @@
 
                 </div>
 
-                <div id="triggerAlert" class="alert" style="margin-top:12px;"></div>
+                <div id="triggerAlert" class="alert alert-<?= autoSwitchInstalled ? 'success' : 'info' ?>" style="margin-top:12px; display:block;">
+                    <?= autoSwitchInstalled ? '✅ Auto-switch enabled.' : '○ Auto-switch disabled.' ?>
+                </div>
             </div>
 
         </div>
@@ -573,7 +577,7 @@
             google.script.run
                 .withSuccessHandler(function (r) {
                     if (r.success) {
-                        showAlert('aiToggleAlert', (r.enabled ? '✅' : '○') + ' ' + r.message, r.enabled ? 'success' : 'info');
+                        showAlert('aiToggleAlert', (enabled ? '✅' : '○') + ' ' + r.message, enabled ? 'success' : 'info');
                     } else {
                         showAlert('aiToggleAlert', '⚠️ ' + r.message, 'error');
                     }
@@ -589,7 +593,7 @@
             google.script.run
                 .withSuccessHandler(function (r) {
                     if (r.success) {
-                        showAlert('triggerAlert', (r.installed ? '✅' : '○') + ' ' + r.message, r.installed ? 'success' : 'info');
+                        showAlert('triggerAlert', (install ? '✅' : '○') + ' ' + r.message, install ? 'success' : 'info');
                         document.getElementById('autoSwitchToggle').checked = r.installed;
                     } else {
                         showAlert('triggerAlert', '⚠️ ' + r.message, 'error');
