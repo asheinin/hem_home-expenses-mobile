@@ -38,9 +38,10 @@ function getMonthlySummary() {
         var now = new Date();
         var currentMonthIdx = now.getMonth() + 1; // 1-based
 
-        // Spouse names
-        var sp1Name = (dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse1NameColumn).getValue() || '').toString().trim();
-        var sp2Name = (dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse2NameColumn).getValue() || '').toString().trim();
+        // Spouse names — batch read both columns in one call
+        var namesRow = dashboard.getRange(myNumbers.dashNamesRow, myNumbers.dashSpouse1NameColumn, 1, myNumbers.dashSpouse2NameColumn - myNumbers.dashSpouse1NameColumn + 1).getValues()[0];
+        var sp1Name = (namesRow[0] || '').toString().trim();
+        var sp2Name = (namesRow[namesRow.length - 1] || '').toString().trim();
 
         // Read the month total from the SUM cell at expenseLastRow+1 in the expense sheet.
         // This cell contains the spreadsheet SUM formula and correctly handles positive and negative amounts.
@@ -177,9 +178,21 @@ function runMobileExpenseAnalysis() {
 // Internal helpers (mobile-adapted versions of agent helpers)
 // ============================================================================
 
+/**
+ * Per-execution cache: avoids re-opening the same spreadsheet multiple times
+ * within a single server-side call. GAS execution context is ephemeral so
+ * this object is reset on every new invocation automatically.
+ */
+var _mobileSSCache = {};
+
 function _mobileGetSpreadsheetForYear(year) {
+    if (_mobileSSCache[year]) return _mobileSSCache[year];
+
     var ss = _getSpreadsheet();
-    if (ss.getName().indexOf(year.toString()) !== -1) return ss;
+    if (ss.getName().indexOf(year.toString()) !== -1) {
+        _mobileSSCache[year] = ss;
+        return ss;
+    }
 
     // Search Drive for "Home Expenses {YYYY}" (e.g. "Home Expenses 2025")
     var targetName = 'Home Expenses ' + year;
@@ -188,7 +201,9 @@ function _mobileGetSpreadsheetForYear(year) {
     while (files.hasNext()) {
         var file = files.next();
         if (!file.isTrashed()) {
-            return SpreadsheetApp.openById(file.getId());
+            var found = SpreadsheetApp.openById(file.getId());
+            _mobileSSCache[year] = found;
+            return found;
         }
     }
 
@@ -199,10 +214,13 @@ function _mobileGetSpreadsheetForYear(year) {
     while (oldFiles.hasNext()) {
         var oldFile = oldFiles.next();
         if (!oldFile.isTrashed()) {
-            return SpreadsheetApp.openById(oldFile.getId());
+            var oldFound = SpreadsheetApp.openById(oldFile.getId());
+            _mobileSSCache[year] = oldFound;
+            return oldFound;
         }
     }
 
+    _mobileSSCache[year] = null;
     return null;
 }
 
@@ -247,8 +265,11 @@ function _mobileGetMonthlyComparisonData(ss, currentMonthIndex, currentYear, pre
     var currentMonthName = months[currentMonthIndex];
     var prevMonthName = months[prevMonthIndex];
 
-    var currentSS = _mobileGetSpreadsheetForYear(currentYear);
-    var currentStats = currentSS ? _mobileGetMonthStats(currentSS, currentMonthName, currentYear, myNumbers) : null;
+    // Use the passed ss for the current year — also seed the cache so subsequent
+    // calls to _mobileGetSpreadsheetForYear(currentYear) return it immediately.
+    if (!_mobileSSCache[currentYear]) _mobileSSCache[currentYear] = ss;
+    var currentSS = ss;
+    var currentStats = _mobileGetMonthStats(currentSS, currentMonthName, currentYear, myNumbers);
 
     var prevSS = (prevMonthYear === currentYear) ? currentSS : _mobileGetSpreadsheetForYear(prevMonthYear);
     var prevStats = prevSS ? _mobileGetMonthStats(prevSS, prevMonthName, prevMonthYear, myNumbers) : null;
@@ -317,12 +338,15 @@ function _mobileGetMonthlyComparisonData(ss, currentMonthIndex, currentYear, pre
 }
 
 function _mobileCalculateAnnualForecast(ss, currentMonthIndex, currentYear, myNumbers, months) {
-    var dashboard = _getSpreadsheet().getSheets()[0];
+    // Use the passed ss directly — avoids an extra _getSpreadsheet() round-trip.
+    // Batch-read all 12 dashboard rows in a single getValues() call.
+    var dashboard = ss.getSheets()[0];
+    var dashValues = dashboard
+        .getRange(myNumbers.dashFirstMonthRow, myNumbers.dashAmountTotalBeforeSplitColumn, 12, 1)
+        .getValues();
     var ytdPosted = 0;
-
     for (var i = 0; i < 12; i++) {
-        var row = myNumbers.dashFirstMonthRow + i;
-        var val = parseFloat(dashboard.getRange(row, myNumbers.dashAmountTotalBeforeSplitColumn).getValue()) || 0;
+        var val = parseFloat(dashValues[i][0]) || 0;
         if (i <= currentMonthIndex) {
             ytdPosted += val;
         }
@@ -334,11 +358,13 @@ function _mobileCalculateAnnualForecast(ss, currentMonthIndex, currentYear, myNu
     var prevYearMonthlyAvg = 0;
 
     if (prevYearSS) {
+        // Batch-read all 12 prior-year dashboard rows in a single getValues() call.
         var prevDashboard = prevYearSS.getSheets()[0];
+        var prevDashValues = prevDashboard
+            .getRange(myNumbers.dashFirstMonthRow, myNumbers.dashAmountTotalBeforeSplitColumn, 12, 1)
+            .getValues();
         for (var j = 0; j < 12; j++) {
-            var pRow = myNumbers.dashFirstMonthRow + j;
-            var pVal = parseFloat(prevDashboard.getRange(pRow, myNumbers.dashAmountTotalBeforeSplitColumn).getValue()) || 0;
-            prevYearTotal += pVal;
+            prevYearTotal += parseFloat(prevDashValues[j][0]) || 0;
         }
         prevYearMonthlyAvg = prevYearTotal / 12;
     }
