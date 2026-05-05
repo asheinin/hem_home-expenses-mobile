@@ -1720,20 +1720,35 @@
 
             // Build sorted data array
             var entries = [];
-            var maxVal = 0;
             for (var cat in categoryTotals) {
                 var v = parseFloat(categoryTotals[cat]) || 0;
                 if (v > 0) {
                     entries.push({ label: cat, value: v });
-                    if (v > maxVal) maxVal = v;
                 }
             }
-            if (!entries.length || maxVal === 0) {
+            if (!entries.length) {
                 container.style.justifyContent = 'center';
                 container.innerHTML = '<span style="font-size:11px;color:var(--muted);margin:auto;">No data</span>';
                 return;
             }
             entries.sort(function (a, b) { return b.value - a.value; });
+
+            var finalEntries = [];
+            if (entries.length > 4) {
+                finalEntries = entries.slice(0, 3);
+                var othersValue = 0;
+                for (var i = 3; i < entries.length; i++) {
+                    othersValue += entries[i].value;
+                }
+                finalEntries.push({ label: 'Others', value: othersValue });
+            } else {
+                finalEntries = entries;
+            }
+
+            var maxVal = 0;
+            finalEntries.forEach(function(e) {
+                if (e.value > maxVal) maxVal = e.value;
+            });
 
             var fmtAmt = function (v) {
                 if (v >= 1000) {
@@ -1743,9 +1758,9 @@
             };
 
             var html = '';
-            entries.forEach(function (e, i) {
+            finalEntries.forEach(function (e, i) {
                 var pctHeight = Math.max(2, (e.value / maxVal) * 100);
-                var color = getColorFn ? getColorFn(e.label) : _BAR_PALETTE[i % _BAR_PALETTE.length];
+                var color = (e.label === 'Others') ? '#9ca3af' : (getColorFn ? getColorFn(e.label) : _BAR_PALETTE[i % _BAR_PALETTE.length]);
                 
                 html += '<div class="ai-bar-col">';
                 html += '<div class="ai-bar-value">' + fmtAmt(e.value) + '</div>';
