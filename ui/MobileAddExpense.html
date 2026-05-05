@@ -1904,11 +1904,13 @@
 
             if (matchResult.type === 'exact') {
                 html = '⚠️ <strong>"' + _esc(matchResult.exp.name) + '"</strong> with category <strong>"' + _esc(matchResult.exp.type) + '"</strong> already exists this month.<br>';
+                html += 'Existing row\'s expense amount is <strong>' + _esc(matchResult.exp.amount) + '</strong>.<br>';
                 html += sheetFull
                     ? '⛔ Monthly limit reached — all ' + _monthCapacity.totalSlots + ' rows are used. Only existing rows can be updated.'
                     : 'How would you like to proceed?';
             } else {
                 html = '⚠️ An entry for <strong>"' + _esc(matchResult.exp.name) + '"</strong> already exists this month with the exact same Category (<strong>' + _esc(matchResult.exp.type) + '</strong>), Split, and PAP options.<br>';
+                html += 'Existing row\'s expense amount is <strong>' + _esc(matchResult.exp.amount) + '</strong>.<br>';
                 html += sheetFull
                     ? '⛔ Monthly limit reached — all ' + _monthCapacity.totalSlots + ' rows are used. Only existing rows can be updated.'
                     : 'Would you like to combine them?';
