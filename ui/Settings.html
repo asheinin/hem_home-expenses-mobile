@@ -367,23 +367,7 @@
             transform: translateX(20px);
         }
 
-        .trigger-status {
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 10px;
-            padding: 7px 10px;
-            border-radius: 8px;
-        }
 
-        .trigger-status.on {
-            background: #ecfdf5;
-            color: #059669;
-        }
-
-        .trigger-status.off {
-            background: #f9fafb;
-            color: var(--muted);
-        }
 
         .divider {
             height: 1px;
@@ -527,14 +511,7 @@
                         </label>
                     </div>
 
-                    <div class="trigger-status <?= autoSwitchInstalled ? 'on' : 'off' ?>" id="triggerStatus">
-                        <? if (autoSwitchInstalled) { ?>
-                        ✅ Active — will auto-switch on 1 Jan
-                        <?= nextYear ?>
-                        <? } else { ?>
-                        ⚠️ Disabled
-                        <? } ?>
-                    </div>
+
                 </div>
 
                 <div id="triggerAlert" class="alert" style="margin-top:12px;"></div>
@@ -595,7 +572,11 @@
         function toggleAIInsights(enabled) {
             google.script.run
                 .withSuccessHandler(function (r) {
-                    showAlert('aiToggleAlert', '✅ ' + r.message, 'success');
+                    if (r.success) {
+                        showAlert('aiToggleAlert', (r.enabled ? '✅' : '○') + ' ' + r.message, r.enabled ? 'success' : 'info');
+                    } else {
+                        showAlert('aiToggleAlert', '⚠️ ' + r.message, 'error');
+                    }
                 })
                 .withFailureHandler(function (err) {
                     showAlert('aiToggleAlert', '❌ ' + err.message, 'error');
@@ -607,13 +588,8 @@
         function toggleAutoSwitch(install) {
             google.script.run
                 .withSuccessHandler(function (r) {
-                    var statusEl = document.getElementById('triggerStatus');
                     if (r.success) {
                         showAlert('triggerAlert', (r.installed ? '✅' : '○') + ' ' + r.message, r.installed ? 'success' : 'info');
-                        statusEl.className = 'trigger-status ' + (r.installed ? 'on' : 'off');
-                        statusEl.textContent = r.installed
-                            ? '✅ Active — will auto-switch on 1 Jan'
-                            : '⚠️ Disabled';
                         document.getElementById('autoSwitchToggle').checked = r.installed;
                     } else {
                         showAlert('triggerAlert', '⚠️ ' + r.message, 'error');

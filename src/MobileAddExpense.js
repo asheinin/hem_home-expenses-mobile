@@ -341,7 +341,7 @@ function saveGeminiApiKey(key) {
 function setUseAIToggle(enabled) {
     try {
         PropertiesService.getScriptProperties().setProperty('USE_AI_TOGGLE', enabled ? 'true' : 'false');
-        return { success: true, message: enabled ? 'AI Insights enabled.' : 'AI Insights disabled.' };
+        return { success: true, enabled: enabled, message: enabled ? 'AI Insights enabled.' : 'AI Insights disabled.' };
     } catch (err) {
         Logger.log(err);
         return { success: false, message: 'Unexpected error: ' + err.toString() };
