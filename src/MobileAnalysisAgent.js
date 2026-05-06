@@ -133,10 +133,9 @@ function runMobileExpenseAnalysis() {
         var useAIToggleStr = PropertiesService.getScriptProperties().getProperty('USE_AI_TOGGLE');
         var aiEnabled = useAIToggleStr === null ? true : (useAIToggleStr === 'true');
 
-        var aiAnalysis = null;
-        if (aiEnabled) {
-            aiAnalysis = _mobileGenerateAgentAnalysis(comparisonData, forecastData, spikeAnalysis);
-        }
+        // Gemini call is deferred — client fetches it via runMobileAIInsights() so the
+        // analytics sheet can render charts/forecast/spikes immediately (~3-8s saved
+        // perceptually).
 
         // ── YTD category totals (sum Jan → current month) ────────────────────
         var ytdCategoryTotals = {};
@@ -159,7 +158,8 @@ function runMobileExpenseAnalysis() {
             comparison: comparisonData,
             forecast: forecastData,
             spikes: spikeAnalysis,
-            aiInsights: aiAnalysis,
+            aiInsights: null,
+            aiPending: aiEnabled,
             currentMonthCategoryTotals: (comparisonData.current && comparisonData.current.categoryTotals) || {},
             ytdCategoryTotals: ytdCategoryTotals,
             aiEnabled: aiEnabled
@@ -168,6 +168,34 @@ function runMobileExpenseAnalysis() {
         return { success: true, results: results };
     } catch (err) {
         Logger.log('runMobileExpenseAnalysis error: ' + err);
+        return { success: false, message: err.toString() };
+    }
+}
+
+/**
+ * Generate Gemini AI insights from a previously computed core analysis payload.
+ * Called from the client immediately after runMobileExpenseAnalysis() returns,
+ * so the analytics sheet can paint without waiting for the LLM round-trip.
+ *
+ * @param {{comparison: Object, forecast: Object, spikes: Object}} payload
+ * @returns {{success: boolean, aiInsights?: string, message?: string}}
+ */
+function runMobileAIInsights(payload) {
+    try {
+        if (!payload) return { success: false, message: 'No analysis payload provided.' };
+
+        var useAIToggleStr = PropertiesService.getScriptProperties().getProperty('USE_AI_TOGGLE');
+        var aiEnabled = useAIToggleStr === null ? true : (useAIToggleStr === 'true');
+        if (!aiEnabled) return { success: false, message: 'AI Insights are disabled in settings.' };
+
+        var insights = _mobileGenerateAgentAnalysis(
+            payload.comparison || {},
+            payload.forecast || {},
+            payload.spikes || { hasAnomalies: false, spikes: [], aboveNormal: [] }
+        );
+        return { success: true, aiInsights: insights };
+    } catch (err) {
+        Logger.log('runMobileAIInsights error: ' + err);
         return { success: false, message: err.toString() };
     }
 }
