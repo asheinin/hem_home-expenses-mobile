@@ -1672,17 +1672,10 @@
 
             // ── AI Insights ──
             html += '<div class="ai-section-title">🧠 AI Insights</div>';
-            html += '<div id="aiInsightsBox">';
             if (r.aiEnabled === false) {
                 html += '<div style="color: red; font-weight: 500; margin-bottom: 15px; padding: 0 15px;">To view AI Insights, enable AI toggle in settings</div>';
             } else if (r.aiInsights) {
                 html += '<div class="ai-insights-box">' + r.aiInsights + '</div>';
-            } else if (r.aiPending) {
-                // Deferred — fetched async after the rest of the page renders
-                html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:24px 16px;color:var(--muted);font-size:13px;">';
-                html += '<div class="ai-spinner" style="width:20px;height:20px;border-width:2px;"></div>';
-                html += '<div>Generating AI insights…</div>';
-                html += '</div>';
             } else {
                 html += '<div class="ai-empty-state">';
                 html += '<div class="ai-empty-icon">🔑</div>';
@@ -1691,7 +1684,6 @@
                 html += '<a class="ai-empty-link" href="' + SETTINGS_URL + '" target="_top">Open Settings →</a>';
                 html += '</div>';
             }
-            html += '</div>';
 
             document.getElementById('aiContent').innerHTML = html;
             document.getElementById('aiContent').style.display = 'block';
@@ -1723,31 +1715,6 @@
             // Draw charts after DOM is updated
             _renderBarChart('barContainerMonth', r.currentMonthCategoryTotals || {}, getColor);
             _renderBarChart('barContainerYtd', r.ytdCategoryTotals || {}, getColor);
-
-            // Fetch AI insights asynchronously — page is already painted
-            if (r.aiPending && r.aiEnabled) {
-                google.script.run
-                    .withSuccessHandler(function (aires) {
-                        var box = document.getElementById('aiInsightsBox');
-                        if (!box) return;
-                        if (aires && aires.success && aires.aiInsights) {
-                            box.innerHTML = '<div class="ai-insights-box">' + aires.aiInsights + '</div>';
-                        } else {
-                            box.innerHTML = '<div class="ai-no-insights">⚠️ Could not generate AI insights' +
-                                (aires && aires.message ? ': ' + _esc(aires.message) : '') + '</div>';
-                        }
-                    })
-                    .withFailureHandler(function (err) {
-                        var box = document.getElementById('aiInsightsBox');
-                        if (!box) return;
-                        box.innerHTML = '<div class="ai-no-insights">❌ AI insights error: ' + _esc(err && err.message ? err.message : 'Unknown error') + '</div>';
-                    })
-                    .runMobileAIInsights({
-                        comparison: r.comparison,
-                        forecast: r.forecast,
-                        spikes: r.spikes
-                    });
-            }
         }
 
         // ── Bar chart renderer ───────────────────────
