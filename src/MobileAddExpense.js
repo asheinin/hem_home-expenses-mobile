@@ -143,26 +143,27 @@ function _serveMain() {
     var expenseTypes = new Set();
     var expensePeriods = new Set();
     var nameCategoryMap = {};
-    
-    var currentMonthIdx = new Date().getMonth() + 1;
 
-    for (var i = 1; i < Math.min(sheets.length, 12); i++) {
-        var sheet = sheets[i];
-        var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
+    var currentMonthIdx = new Date().getMonth() + 1;
+    var numRows = myNumbers.expenseLastRow - myNumbers.expenseFirstRow + 1;
+    var descrIdx = myNumbers.expenseDescrColumn - 1;
+    var typeIdx = myNumbers.expenseTypeColumn - 1;
+    var periodIdx = myNumbers.expencePeriodColumn - 1;
+
+    function _scanSheetForRefData(sheet, collectNames) {
+        if (!sheet) return;
         var values = sheet
             .getRange(myNumbers.expenseFirstRow, 1, numRows, myNumbers.expensePAPColumn)
             .getValues();
+        for (var r = 0; r < values.length; r++) {
+            var row = values[r];
+            var n = row[descrIdx];
+            var t = row[typeIdx];
+            var p = row[periodIdx];
 
-        values.forEach(function (row) {
-            var n = row[myNumbers.expenseDescrColumn - 1];
-            var t = row[myNumbers.expenseTypeColumn - 1];
-            var p = row[myNumbers.expencePeriodColumn - 1];
-            
-            if (n && i === currentMonthIdx) {
+            if (n && collectNames) {
                 var nStr = n.toString().trim();
                 expenseNames.add(nStr);
-                
-                // Store fastest category mapping for synchronous client resolution
                 var tStr = t ? t.toString().trim() : '';
                 if (tStr && !nameCategoryMap[nStr.toLowerCase()]) {
                     nameCategoryMap[nStr.toLowerCase()] = tStr;
@@ -170,7 +171,18 @@ function _serveMain() {
             }
             if (t) expenseTypes.add(t.toString().trim());
             if (p) expensePeriods.add(p.toString().trim());
-        });
+        }
+    }
+
+    // Read only the current month sheet for autocomplete data — saves ~11 Sheets API
+    // round-trips vs. scanning all 12 months. Names/categories come from the current
+    // month; types/periods are typically reused so a single-month scan is sufficient.
+    _scanSheetForRefData(sheets[currentMonthIdx], true);
+
+    // Early-month fallback: if the current sheet hasn't been populated yet, pull
+    // category/period suggestions from the previous month so dropdowns aren't empty.
+    if (expenseTypes.size < 3 && currentMonthIdx > 1) {
+        _scanSheetForRefData(sheets[currentMonthIdx - 1], false);
     }
 
     var dashboard = sheets[0];
