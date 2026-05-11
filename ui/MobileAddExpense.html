@@ -1506,7 +1506,7 @@
                             <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
                             <div class="dots-menu-item" onclick="openAnalysisSheet()">🤖 AI Expense Analysis</div>
                             <div class="dots-menu-item" onclick="openHomeSheet()">🏠 My Home</div>
-                            <div class="dots-menu-item" onclick="window.top.location.href='<?= ScriptApp.getService().getUrl() ?>?page=settings'">Settings</div>
+                            <div class="dots-menu-item" onclick="openSettingsSheet()">⚙️ Settings</div>
                         </div>
                     </div>
                 </div>
@@ -1805,6 +1805,73 @@
                     <span id="homeSaveBtnText">Save Changes</span>
                 </button>
                 <div class="home-status" id="homeStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings bottom sheet -->
+    <div class="ref-overlay" id="settingsOverlay" onclick="closeSettingsSheet()"></div>
+    <div class="home-sheet" id="settingsSheet">
+        <div class="home-sheet-handle"></div>
+        <div class="home-sheet-header">
+            <span class="home-sheet-title">⚙️ Settings</span>
+            <button class="home-close-btn" onclick="closeSettingsSheet()" aria-label="Close">✕</button>
+        </div>
+        <div class="home-sheet-body">
+            <!-- Connected Spreadsheet -->
+            <div class="home-section">
+                <div class="home-section-title">Connected Spreadsheet</div>
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f0f0f5;">
+                    <span id="sFileIcon" style="font-size:20px;flex-shrink:0;">📊</span>
+                    <div style="flex:1;min-width:0;">
+                        <div id="sFileName" style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading…</div>
+                        <div id="sFileLabel" style="font-size:11px;color:var(--muted);margin-top:2px;">Currently connected</div>
+                    </div>
+                </div>
+                <div id="sConfigAlert" style="display:none;font-size:13px;font-weight:500;padding:10px 16px;line-height:1.5;border-radius:8px;margin:8px 12px 0;"></div>
+                <div style="padding:10px 16px 4px;">
+                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">URL, ID or Drive file name</div>
+                    <input type="text" id="sSpreadsheetInput" placeholder="Paste URL or type 'Home Expenses 2027'" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;color:var(--text);background:#fafafa;outline:none;box-sizing:border-box;">
+                </div>
+                <div style="padding:10px 16px 14px;">
+                    <button class="home-save-btn" id="sSaveBtn" onclick="sConnectSpreadsheet()" style="margin-top:0;"><span id="sSaveBtnText">Connect Spreadsheet</span></button>
+                </div>
+            </div>
+            <!-- Gemini API Key -->
+            <div class="home-section">
+                <div class="home-section-title">Gemini API Key</div>
+                <div id="sApiKeyAlert" style="display:none;font-size:13px;font-weight:500;padding:10px 16px;line-height:1.5;border-radius:8px;margin:8px 12px 0;"></div>
+                <div style="padding:10px 16px 4px;">
+                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">API Key for AI Analytics</div>
+                    <input type="password" id="sGeminiKey" placeholder="Paste your Gemini API key here" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;color:var(--text);background:#fafafa;outline:none;box-sizing:border-box;">
+                </div>
+                <div style="padding:10px 16px 14px;">
+                    <button class="home-save-btn" id="sApiKeyBtn" onclick="sSaveApiKey()" style="margin-top:0;"><span id="sApiKeyBtnText">Save API Key</span></button>
+                </div>
+            </div>
+            <!-- AI Insights toggle -->
+            <div class="home-section">
+                <div class="home-section-title">AI Expense Analysis</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f0f5;">
+                    <div>
+                        <div style="font-size:14px;font-weight:600;color:var(--text);">Enable AI Insights</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Use Gemini to generate spending insights.</div>
+                    </div>
+                    <label class="switch" style="flex-shrink:0;"><input type="checkbox" id="sAIToggle" onchange="sToggleAI(this.checked)"><span class="slider"></span></label>
+                </div>
+                <div id="sAIAlert" style="display:none;font-size:12px;font-weight:500;padding:8px 16px;"></div>
+            </div>
+            <!-- Auto year-switch -->
+            <div class="home-section" style="margin-bottom:24px;">
+                <div class="home-section-title">Auto Year-Switch</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;">
+                    <div>
+                        <div style="font-size:14px;font-weight:600;color:var(--text);">Switch file on January 1st</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Finds <em>Home Expenses <?= nextYear ?></em> in Drive on New Year's Day.</div>
+                    </div>
+                    <label class="switch" style="flex-shrink:0;"><input type="checkbox" id="sAutoSwitch" onchange="sToggleAutoSwitch(this.checked)"><span class="slider"></span></label>
+                </div>
+                <div id="sSwitchAlert" style="display:none;font-size:12px;font-weight:500;padding:8px 16px;"></div>
             </div>
         </div>
     </div>
@@ -2637,6 +2704,318 @@
 
         // ── My Home sheet ─────────────────────────────────────────────────────────
         var _homeLoaded = false;
+        var _homeSnapshot = null;
+
+        function _homeIsDirty() {
+            if (!_homeSnapshot) return false;
+            var cur = _homeSnapshot;
+            return document.getElementById('homeAddress').value    !== cur.address    ||
+                   document.getElementById('homeSp1Name').value    !== cur.sp1Name    ||
+                   document.getElementById('homeSp1Email').value   !== cur.sp1Email   ||
+                   document.getElementById('homeSp1Balance').value !== cur.sp1Balance ||
+                   document.getElementById('homeSp2Name').value    !== cur.sp2Name    ||
+                   document.getElementById('homeSp2Email').value   !== cur.sp2Email   ||
+                   document.getElementById('homeSp2Balance').value !== cur.sp2Balance ||
+                   document.getElementById('splitSp1').value       !== cur.split1     ||
+                   document.getElementById('splitSp2').value       !== cur.split2;
+        }
+
+        function _homeRefreshSaveBtn() {
+            var btn = document.getElementById('homeSaveBtn');
+            var dirty = _homeIsDirty();
+            btn.disabled = !dirty;
+            btn.style.opacity = dirty ? '1' : '0.45';
+            btn.style.cursor  = dirty ? 'pointer' : 'default';
+        }
+
+        function openHomeSheet() {
+            document.getElementById('dotsMenu').classList.remove('open');
+            document.getElementById('homeOverlay').classList.add('open');
+            document.getElementById('homeSheet').classList.add('open');
+            if (!_homeLoaded) _loadHomeConfig();
+        }
+
+        function closeHomeSheet() {
+            document.getElementById('homeOverlay').classList.remove('open');
+            document.getElementById('homeSheet').classList.remove('open');
+        }
+
+        function _loadHomeConfig() {
+            document.getElementById('homeLoading').style.display = 'block';
+            document.getElementById('homeContent').style.display = 'none';
+            google.script.run
+                .withSuccessHandler(function (res) {
+                    document.getElementById('homeLoading').style.display = 'none';
+                    if (!res || !res.success) {
+                        document.getElementById('homeLoading').textContent =
+                            '⚠️ Could not load data' + (res && res.message ? ': ' + res.message : '.');
+                        return;
+                    }
+                    _populateHomeForm(res);
+                    document.getElementById('homeContent').style.display = 'block';
+                    _homeLoaded = true;
+                })
+                .withFailureHandler(function (err) {
+                    document.getElementById('homeLoading').textContent =
+                        '❌ Error: ' + (err.message || 'Unknown error');
+                })
+                .getHomeConfig();
+        }
+
+        function _populateHomeForm(d) {
+            document.getElementById('homeAddress').value    = d.address    || '';
+            document.getElementById('homeSp1Name').value    = d.sp1Name    || '';
+            document.getElementById('homeSp1Email').value   = d.sp1Email   || '';
+            document.getElementById('homeSp1Balance').value = d.sp1Balance !== undefined ? String(d.sp1Balance) : '';
+            document.getElementById('homeSp2Name').value    = d.sp2Name    || '';
+            document.getElementById('homeSp2Email').value   = d.sp2Email   || '';
+            document.getElementById('homeSp2Balance').value = d.sp2Balance !== undefined ? String(d.sp2Balance) : '';
+            var s1 = parseFloat(d.sp1Split) || 0;
+            var s2 = parseFloat(d.sp2Split) || 0;
+            document.getElementById('splitSp1').value = s1;
+            document.getElementById('splitSp2').value = s2;
+            _updateSplitBar(s1, s2);
+            var n1 = d.sp1Name || 'Person 1';
+            var n2 = d.sp2Name || 'Person 2';
+            document.getElementById('homeSp1Title').textContent = n1;
+            document.getElementById('homeSp2Title').textContent = n2;
+            document.getElementById('splitLabel1').textContent  = n1;
+            document.getElementById('splitLabel2').textContent  = n2;
+            // Take snapshot for dirty tracking
+            _homeSnapshot = {
+                address:    document.getElementById('homeAddress').value,
+                sp1Name:    document.getElementById('homeSp1Name').value,
+                sp1Email:   document.getElementById('homeSp1Email').value,
+                sp1Balance: document.getElementById('homeSp1Balance').value,
+                sp2Name:    document.getElementById('homeSp2Name').value,
+                sp2Email:   document.getElementById('homeSp2Email').value,
+                sp2Balance: document.getElementById('homeSp2Balance').value,
+                split1:     document.getElementById('splitSp1').value,
+                split2:     document.getElementById('splitSp2').value
+            };
+            _homeRefreshSaveBtn();
+        }
+
+        function _updateSplitBar(s1, s2) {
+            var p1 = Math.min(100, Math.max(0, s1));
+            var p2 = 100 - p1;
+            var bar1 = document.getElementById('splitBarSp1');
+            var bar2 = document.getElementById('splitBarSp2');
+            bar1.style.width = p1 + '%';
+            bar2.style.width = p2 + '%';
+            bar1.textContent = p1 > 8 ? p1 + '%' : '';
+            bar2.textContent = p2 > 8 ? p2 + '%' : '';
+        }
+
+        // Wire up split inputs — changing one mirrors the other to 100 - x
+        (function () {
+            function onSp1Change() {
+                var v = parseFloat(document.getElementById('splitSp1').value);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 100) v = 100;
+                var other = +(100 - v).toFixed(2);
+                document.getElementById('splitSp2').value = other;
+                _updateSplitBar(v, other);
+                _homeRefreshSaveBtn();
+            }
+            function onSp2Change() {
+                var v = parseFloat(document.getElementById('splitSp2').value);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 100) v = 100;
+                var other = +(100 - v).toFixed(2);
+                document.getElementById('splitSp1').value = other;
+                _updateSplitBar(other, v);
+                _homeRefreshSaveBtn();
+            }
+            document.getElementById('splitSp1').addEventListener('input', onSp1Change);
+            document.getElementById('splitSp2').addEventListener('input', onSp2Change);
+
+            var homeInputIds = ['homeAddress','homeSp1Name','homeSp1Email','homeSp1Balance',
+                                'homeSp2Name','homeSp2Email','homeSp2Balance'];
+            homeInputIds.forEach(function(id) {
+                document.getElementById(id).addEventListener('input', function() {
+                    if (id === 'homeSp1Name') {
+                        var n = this.value.trim() || 'Person 1';
+                        document.getElementById('homeSp1Title').textContent = n;
+                        document.getElementById('splitLabel1').textContent  = n;
+                    }
+                    if (id === 'homeSp2Name') {
+                        var n = this.value.trim() || 'Person 2';
+                        document.getElementById('homeSp2Title').textContent = n;
+                        document.getElementById('splitLabel2').textContent  = n;
+                    }
+                    _homeRefreshSaveBtn();
+                });
+            });
+        })();
+
+        function saveHomeConfig() {
+            var btn    = document.getElementById('homeSaveBtn');
+            var text   = document.getElementById('homeSaveBtnText');
+            var status = document.getElementById('homeStatus');
+            var s1 = parseFloat(document.getElementById('splitSp1').value);
+            var s2 = parseFloat(document.getElementById('splitSp2').value);
+            if (isNaN(s1) || isNaN(s2) || Math.abs(s1 + s2 - 100) > 0.01) {
+                status.textContent = '⚠️ Split percentages must sum to 100%.';
+                status.className = 'home-status err';
+                return;
+            }
+            btn.disabled = true;
+            text.textContent = 'Saving…';
+            status.textContent = '';
+            status.className = 'home-status';
+            var data = {
+                address:    document.getElementById('homeAddress').value.trim(),
+                sp1Name:    document.getElementById('homeSp1Name').value.trim(),
+                sp2Name:    document.getElementById('homeSp2Name').value.trim(),
+                sp1Email:   document.getElementById('homeSp1Email').value.trim(),
+                sp2Email:   document.getElementById('homeSp2Email').value.trim(),
+                sp1Balance: parseFloat(document.getElementById('homeSp1Balance').value) || 0,
+                sp2Balance: parseFloat(document.getElementById('homeSp2Balance').value) || 0,
+                sp1Split: s1, sp2Split: s2
+            };
+            google.script.run
+                .withSuccessHandler(function (res) {
+                    text.textContent = 'Save Changes';
+                    if (res && res.success) {
+                        status.textContent = '✓ ' + res.message;
+                        status.className = 'home-status ok';
+                        // Re-snapshot so button goes grey again
+                        _populateHomeForm(Object.assign(data, {
+                            sp1Split: s1, sp2Split: s2,
+                            sp1Name: data.sp1Name, sp2Name: data.sp2Name
+                        }));
+                        _homeLoaded = true;
+                    } else {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                        status.textContent = '⚠️ ' + (res ? res.message : 'Unknown error.');
+                        status.className = 'home-status err';
+                    }
+                    setTimeout(function () { status.textContent = ''; status.className = 'home-status'; }, 4000);
+                })
+                .withFailureHandler(function (err) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    text.textContent = 'Save Changes';
+                    status.textContent = '❌ ' + (err.message || 'Save failed.');
+                    status.className = 'home-status err';
+                })
+                .saveHomeConfig(data);
+        }
+
+        // ── Settings sheet ────────────────────────────────────────────────────────
+        var _settingsLoaded = false;
+
+        function openSettingsSheet() {
+            document.getElementById('dotsMenu').classList.remove('open');
+            document.getElementById('settingsOverlay').classList.add('open');
+            document.getElementById('settingsSheet').classList.add('open');
+            if (!_settingsLoaded) _loadSettings();
+        }
+
+        function closeSettingsSheet() {
+            document.getElementById('settingsOverlay').classList.remove('open');
+            document.getElementById('settingsSheet').classList.remove('open');
+        }
+
+        function _loadSettings() {
+            google.script.run
+                .withSuccessHandler(function (s) {
+                    _settingsLoaded = true;
+                    if (s.name) {
+                        document.getElementById('sFileName').textContent = s.name;
+                        document.getElementById('sFileLabel').textContent = 'Currently connected';
+                        document.getElementById('sFileIcon').textContent = '📊';
+                    } else {
+                        document.getElementById('sFileName').textContent = 'Not configured';
+                        document.getElementById('sFileLabel').textContent = 'Enter a URL or file name below';
+                        document.getElementById('sFileIcon').textContent = '⚠️';
+                    }
+                    document.getElementById('sSpreadsheetInput').value = s.id || '';
+                    document.getElementById('sGeminiKey').value = s.geminiApiKey || '';
+                    document.getElementById('sAIToggle').checked = !!s.useAIToggle;
+                    document.getElementById('sAutoSwitch').checked = !!s.autoSwitchInstalled;
+                    _sShowAlert('sAIAlert', (s.useAIToggle ? '✅ AI Insights enabled.' : '○ AI Insights disabled.'),
+                        s.useAIToggle ? '#059669' : '#6b7280');
+                    _sShowAlert('sSwitchAlert', (s.autoSwitchInstalled ? '✅ Auto-switch enabled.' : '○ Auto-switch disabled.'),
+                        s.autoSwitchInstalled ? '#059669' : '#6b7280');
+                })
+                .withFailureHandler(function() {})
+                .getSettings();
+        }
+
+        function sConnectSpreadsheet() {
+            var input = document.getElementById('sSpreadsheetInput').value.trim();
+            if (!input) { _sShowAlert('sConfigAlert', 'Please enter a URL or file name.', '#dc2626'); return; }
+            document.getElementById('sSaveBtn').disabled = true;
+            document.getElementById('sSaveBtnText').textContent = 'Connecting…';
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    document.getElementById('sSaveBtn').disabled = false;
+                    document.getElementById('sSaveBtnText').textContent = 'Connect Spreadsheet';
+                    if (r.success) {
+                        document.getElementById('sFileName').textContent = r.name;
+                        document.getElementById('sFileLabel').textContent = 'Currently connected';
+                        document.getElementById('sFileIcon').textContent = '📊';
+                        _sShowAlert('sConfigAlert', '✅ ' + r.message, '#059669');
+                    } else {
+                        _sShowAlert('sConfigAlert', '⚠️ ' + r.message, '#dc2626');
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById('sSaveBtn').disabled = false;
+                    document.getElementById('sSaveBtnText').textContent = 'Connect Spreadsheet';
+                    _sShowAlert('sConfigAlert', '❌ ' + (err.message || 'Failed.'), '#dc2626');
+                })
+                .saveSpreadsheetConfig(input);
+        }
+
+        function sSaveApiKey() {
+            document.getElementById('sApiKeyBtn').disabled = true;
+            document.getElementById('sApiKeyBtnText').textContent = 'Saving…';
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    document.getElementById('sApiKeyBtn').disabled = false;
+                    document.getElementById('sApiKeyBtnText').textContent = 'Save API Key';
+                    _sShowAlert('sApiKeyAlert', (r.success ? '✅ ' : '⚠️ ') + r.message, r.success ? '#059669' : '#dc2626');
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById('sApiKeyBtn').disabled = false;
+                    document.getElementById('sApiKeyBtnText').textContent = 'Save API Key';
+                    _sShowAlert('sApiKeyAlert', '❌ ' + (err.message || 'Failed.'), '#dc2626');
+                })
+                .saveGeminiApiKey(document.getElementById('sGeminiKey').value.trim());
+        }
+
+        function sToggleAI(enabled) {
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    _sShowAlert('sAIAlert', (enabled ? '✅' : '○') + ' ' + (r.message || ''), enabled ? '#059669' : '#6b7280');
+                })
+                .withFailureHandler(function() {})
+                .setUseAIToggle(enabled);
+        }
+
+        function sToggleAutoSwitch(install) {
+            google.script.run
+                .withSuccessHandler(function (r) {
+                    document.getElementById('sAutoSwitch').checked = r.installed;
+                    _sShowAlert('sSwitchAlert', (install ? '✅' : '○') + ' ' + (r.message || ''), install ? '#059669' : '#6b7280');
+                })
+                .withFailureHandler(function() {})
+                .setAutoSwitchTrigger(install);
+        }
+
+        function _sShowAlert(id, msg, color) {
+            var el = document.getElementById(id);
+            el.textContent = msg;
+            el.style.color = color;
+            el.style.display = 'block';
+        }
+
 
         function openHomeSheet() {
             document.getElementById('dotsMenu').classList.remove('open');
