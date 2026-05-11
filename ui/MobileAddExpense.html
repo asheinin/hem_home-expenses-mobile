@@ -1867,7 +1867,7 @@
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;">
                     <div>
                         <div style="font-size:14px;font-weight:600;color:var(--text);">Switch file on January 1st</div>
-                        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Finds <em>Home Expenses <?= nextYear ?></em> in Drive on New Year's Day.</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Finds <em>Home Expenses <script>document.write(new Date().getFullYear() + 1)</script></em> in Drive on New Year's Day.</div>
                     </div>
                     <label class="switch" style="flex-shrink:0;"><input type="checkbox" id="sAutoSwitch" onchange="sToggleAutoSwitch(this.checked)"><span class="slider"></span></label>
                 </div>
