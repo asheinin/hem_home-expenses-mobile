@@ -32,13 +32,20 @@ class staticNumbers {
         this.expensePAPColumn = 12;
 
         // Dashboard rows
+        this.dashAddressRow = 1;
         this.dashNamesRow = 2;
         this.dashEmailsRow = 3;
+        this.dashSplitRow = 4;
+        this.dashBalancesRow = 5;
+        this.dashTitleRow = 6;
         this.dashFirstMonthRow = 7;
 
-        // Dashboard name columns
+        // Dashboard name/address/split columns
         this.dashSpouse1NameColumn = 2;
         this.dashSpouse2NameColumn = 3;
+        this.dashAddressColumn = 2;
+        this.dashSp1SplitColumn = 2;
+        this.dashSp2SplitColumn = 3;
 
         // Dashboard data columns
         this.dashMonthNameColumn = 1;
@@ -55,6 +62,11 @@ class staticNumbers {
         this.dashSp2BalanceColumn = 12;
         this.dashSp1BalanceColumn = 13;
         this.dashColumns = 13;
+
+        // Dashboard balance cell color constants
+        this.dashBalanceNegativeBgColor = "red";
+        this.dashBalancePositiveBgColor = "green";
+        this.dashBalanceNeutralBgColor = "green";
 
         // Expense Analysis Agent — non-posted monthly projection defaults
         this.agentGroceriesMonthly = 800;
