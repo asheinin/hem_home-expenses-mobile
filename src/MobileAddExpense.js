@@ -709,3 +709,82 @@ function mobileProcessForm(
         return { success: false, message: 'Error: ' + err.toString() };
     }
 }
+
+// ============================================================================
+// My Home — Dashboard config read/write
+// ============================================================================
+
+/**
+ * Reads household configuration from the Dashboard sheet (sheet index 0).
+ * @returns {{success:boolean, address:string, sp1Name:string, sp2Name:string,
+ *            sp1Email:string, sp2Email:string,
+ *            sp1Balance:number, sp2Balance:number,
+ *            sp1Split:number, sp2Split:number}}
+ */
+function getHomeConfig() {
+    try {
+        var n = new staticNumbers();
+        var dash = _getSpreadsheet().getSheets()[0];
+
+        var address   = dash.getRange(n.dashAddressRow,  n.dashAddressColumn).getValue();
+        var sp1Name   = dash.getRange(n.dashNamesRow,    n.dashSpouse1NameColumn).getValue();
+        var sp2Name   = dash.getRange(n.dashNamesRow,    n.dashSpouse2NameColumn).getValue();
+        var sp1Email  = dash.getRange(n.dashEmailsRow,   n.dashSpouse1NameColumn).getValue();
+        var sp2Email  = dash.getRange(n.dashEmailsRow,   n.dashSpouse2NameColumn).getValue();
+        var sp1Balance = dash.getRange(n.dashBalancesRow, n.dashSpouse1NameColumn).getValue();
+        var sp2Balance = dash.getRange(n.dashBalancesRow, n.dashSpouse2NameColumn).getValue();
+        var sp1Split  = dash.getRange(n.dashSplitRow,    n.dashSp1SplitColumn).getValue();
+        var sp2Split  = dash.getRange(n.dashSplitRow,    n.dashSp2SplitColumn).getValue();
+
+        return {
+            success: true,
+            address:    address    ? address.toString()    : '',
+            sp1Name:    sp1Name    ? sp1Name.toString()    : '',
+            sp2Name:    sp2Name    ? sp2Name.toString()    : '',
+            sp1Email:   sp1Email   ? sp1Email.toString()   : '',
+            sp2Email:   sp2Email   ? sp2Email.toString()   : '',
+            sp1Balance: parseFloat(sp1Balance) || 0,
+            sp2Balance: parseFloat(sp2Balance) || 0,
+            sp1Split:   parseFloat(sp1Split)   || 0,
+            sp2Split:   parseFloat(sp2Split)   || 0
+        };
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, message: err.toString() };
+    }
+}
+
+/**
+ * Writes household configuration back to the Dashboard sheet.
+ * @param {{address, sp1Name, sp2Name, sp1Email, sp2Email,
+ *          sp1Balance, sp2Balance, sp1Split, sp2Split}} data
+ * @returns {{success:boolean, message:string}}
+ */
+function saveHomeConfig(data) {
+    try {
+        var n = new staticNumbers();
+        var dash = _getSpreadsheet().getSheets()[0];
+
+        // Validate splits
+        var s1 = parseFloat(data.sp1Split);
+        var s2 = parseFloat(data.sp2Split);
+        if (isNaN(s1) || isNaN(s2) || Math.abs(s1 + s2 - 100) > 0.01) {
+            return { success: false, message: 'Split percentages must sum to exactly 100%.' };
+        }
+
+        dash.getRange(n.dashAddressRow,  n.dashAddressColumn).setValue(data.address  || '');
+        dash.getRange(n.dashNamesRow,    n.dashSpouse1NameColumn).setValue(data.sp1Name  || '');
+        dash.getRange(n.dashNamesRow,    n.dashSpouse2NameColumn).setValue(data.sp2Name  || '');
+        dash.getRange(n.dashEmailsRow,   n.dashSpouse1NameColumn).setValue(data.sp1Email || '');
+        dash.getRange(n.dashEmailsRow,   n.dashSpouse2NameColumn).setValue(data.sp2Email || '');
+        dash.getRange(n.dashBalancesRow, n.dashSpouse1NameColumn).setValue(parseFloat(data.sp1Balance) || 0);
+        dash.getRange(n.dashBalancesRow, n.dashSpouse2NameColumn).setValue(parseFloat(data.sp2Balance) || 0);
+        dash.getRange(n.dashSplitRow,    n.dashSp1SplitColumn).setValue(s1);
+        dash.getRange(n.dashSplitRow,    n.dashSp2SplitColumn).setValue(s2);
+
+        return { success: true, message: 'Home configuration saved.' };
+    } catch (err) {
+        Logger.log(err);
+        return { success: false, message: 'Error saving: ' + err.toString() };
+    }
+}

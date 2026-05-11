@@ -1257,6 +1257,237 @@
         .seg-option:active {
             opacity: 0.75;
         }
+
+        /* ── My Home sheet ── */
+        .home-sheet {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f9fc;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -6px 40px rgba(0,0,0,0.18);
+            z-index: 400;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+        }
+        .home-sheet.open { transform: translateY(0); }
+
+        .home-sheet-handle {
+            width: 36px; height: 4px;
+            background: #d1d5db;
+            border-radius: 2px;
+            margin: 10px auto 0;
+            flex-shrink: 0;
+        }
+
+        .home-sheet-header {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px 12px;
+            border-bottom: 1.5px solid var(--border);
+            flex-shrink: 0;
+            gap: 10px;
+        }
+        .home-sheet-title {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .home-close-btn {
+            background: #f0f0f5;
+            border: none;
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--muted);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .home-close-btn:hover { background: #dde0ee; }
+
+        .home-sheet-body {
+            overflow-y: auto;
+            flex: 1;
+            padding: 0 18px 24px;
+        }
+
+        .home-section {
+            background: white;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            margin-top: 16px;
+            overflow: hidden;
+        }
+        .home-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            padding: 12px 16px 8px;
+            background: #f0f2ff;
+            border-bottom: 1px solid var(--border);
+        }
+        .home-field {
+            display: flex;
+            align-items: center;
+            padding: 11px 16px;
+            gap: 10px;
+            border-bottom: 1px solid #f0f0f5;
+        }
+        .home-field:last-child { border-bottom: none; }
+        .home-field-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            width: 68px;
+            flex-shrink: 0;
+        }
+        .home-field input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: transparent;
+            padding: 0;
+        }
+        .home-field input::placeholder { color: #c0c4d0; }
+        .home-field input:focus { color: var(--primary-dark); }
+
+        .home-prefix {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+        .home-suffix {
+            font-size: 13px;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        /* Split slider widget */
+        .split-widget {
+            padding: 16px 16px 20px;
+        }
+        .split-bar-wrap {
+            position: relative;
+            height: 36px;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
+        }
+        .split-bar-sp1 {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: width 0.2s;
+            display: flex; align-items: center;
+            padding-left: 12px;
+            font-size: 12px; font-weight: 700; color: white;
+            white-space: nowrap; overflow: hidden;
+        }
+        .split-bar-sp2 {
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            background: #e2e6fa;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 12px;
+            font-size: 12px; font-weight: 700; color: var(--primary-dark);
+            white-space: nowrap; overflow: hidden;
+        }
+        .split-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .split-input-box {
+            flex: 1;
+            background: #f0f2ff;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .split-input-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: inherit;
+            color: var(--primary-dark);
+            background: transparent;
+            padding: 10px 0 10px 12px;
+            width: 0;
+        }
+        .split-pct {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--muted);
+            padding-right: 12px;
+        }
+        .split-divider {
+            font-size: 13px; font-weight: 700; color: var(--muted);
+        }
+        .split-names-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .split-name-label {
+            font-size: 12px; font-weight: 600; color: var(--muted);
+        }
+
+        .home-save-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .home-save-btn:active { opacity: 0.8; }
+        .home-save-btn:disabled { opacity: 0.55; cursor: default; }
+
+        .home-status {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 10px;
+            min-height: 18px;
+            padding: 0 4px;
+        }
+        .home-status.ok  { color: #16a34a; }
+        .home-status.err { color: #dc2626; }
+
+        .home-loading {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
     </style>
 </head>
 
@@ -1274,8 +1505,9 @@
                         <div class="dots-menu" id="dotsMenu">
                             <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
                             <div class="dots-menu-item" onclick="openAnalysisSheet()">🤖 AI Expense Analysis</div>
+                            <div class="dots-menu-item" onclick="openHomeSheet()">🏠 My Home</div>
                             <a class="dots-menu-item" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
-                                style="text-decoration:none;color:inherit;">⚙️ Settings</a>
+                                style="text-decoration:none;color:inherit;">Settings</a>
                         </div>
                     </div>
                 </div>
@@ -1483,6 +1715,98 @@
                 <div>Running AI analysis…<br><small>This may take a few seconds</small></div>
             </div>
             <div id="aiContent" style="display:none"></div>
+        </div>
+    </div>
+
+    <!-- My Home bottom sheet -->
+    <div class="ref-overlay" id="homeOverlay" onclick="closeHomeSheet()"></div>
+    <div class="home-sheet" id="homeSheet">
+        <div class="home-sheet-handle"></div>
+        <div class="home-sheet-header">
+            <span class="home-sheet-title">🏠 My Home</span>
+            <button class="home-close-btn" onclick="closeHomeSheet()" aria-label="Close">✕</button>
+        </div>
+        <div class="home-sheet-body" id="homeSheetBody">
+            <div class="home-loading" id="homeLoading">Loading…</div>
+            <div id="homeContent" style="display:none">
+
+                <!-- Address -->
+                <div class="home-section">
+                    <div class="home-section-title">Address</div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeAddress">Address</label>
+                        <input type="text" id="homeAddress" placeholder="123 Main St" autocomplete="street-address">
+                    </div>
+                </div>
+
+                <!-- Person 1 -->
+                <div class="home-section">
+                    <div class="home-section-title" id="homeSp1Title">Person 1</div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeSp1Name">Name</label>
+                        <input type="text" id="homeSp1Name" placeholder="Full name" autocomplete="off">
+                    </div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeSp1Email">Email</label>
+                        <input type="email" id="homeSp1Email" placeholder="email@example.com" autocomplete="off" inputmode="email">
+                    </div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeSp1Balance">Balance</label>
+                        <span class="home-prefix">$</span>
+                        <input type="text" id="homeSp1Balance" placeholder="0.00" inputmode="decimal" autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Person 2 -->
+                <div class="home-section">
+                    <div class="home-section-title" id="homeSp2Title">Person 2</div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeSp2Name">Name</label>
+                        <input type="text" id="homeSp2Name" placeholder="Full name" autocomplete="off">
+                    </div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeSp2Email">Email</label>
+                        <input type="email" id="homeSp2Email" placeholder="email@example.com" autocomplete="off" inputmode="email">
+                    </div>
+                    <div class="home-field">
+                        <label class="home-field-label" for="homeSp2Balance">Balance</label>
+                        <span class="home-prefix">$</span>
+                        <input type="text" id="homeSp2Balance" placeholder="0.00" inputmode="decimal" autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Expense Split -->
+                <div class="home-section">
+                    <div class="home-section-title">Expense Split</div>
+                    <div class="split-widget">
+                        <div class="split-names-row">
+                            <span class="split-name-label" id="splitLabel1">Person 1</span>
+                            <span class="split-name-label" id="splitLabel2">Person 2</span>
+                        </div>
+                        <div class="split-bar-wrap" id="splitBar">
+                            <div class="split-bar-sp1" id="splitBarSp1">50%</div>
+                            <div class="split-bar-sp2" id="splitBarSp2">50%</div>
+                        </div>
+                        <div class="split-inputs">
+                            <div class="split-input-box">
+                                <input type="text" id="splitSp1" inputmode="decimal" value="50" aria-label="Person 1 split %">
+                                <span class="split-pct">%</span>
+                            </div>
+                            <span class="split-divider">+</span>
+                            <div class="split-input-box">
+                                <input type="text" id="splitSp2" inputmode="decimal" value="50" aria-label="Person 2 split %">
+                                <span class="split-pct">%</span>
+                            </div>
+                            <span class="split-divider">=&nbsp;100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="home-save-btn" id="homeSaveBtn" onclick="saveHomeConfig()">
+                    <span id="homeSaveBtnText">Save Changes</span>
+                </button>
+                <div class="home-status" id="homeStatus"></div>
+            </div>
         </div>
     </div>
 
@@ -2311,6 +2635,166 @@
                 });
             }
         });
+
+        // ── My Home sheet ─────────────────────────────────────────────────────────
+        var _homeLoaded = false;
+
+        function openHomeSheet() {
+            document.getElementById('dotsMenu').classList.remove('open');
+            document.getElementById('homeOverlay').classList.add('open');
+            document.getElementById('homeSheet').classList.add('open');
+            if (!_homeLoaded) _loadHomeConfig();
+        }
+
+        function closeHomeSheet() {
+            document.getElementById('homeOverlay').classList.remove('open');
+            document.getElementById('homeSheet').classList.remove('open');
+        }
+
+        function _loadHomeConfig() {
+            document.getElementById('homeLoading').style.display = 'block';
+            document.getElementById('homeContent').style.display = 'none';
+            google.script.run
+                .withSuccessHandler(function (res) {
+                    document.getElementById('homeLoading').style.display = 'none';
+                    if (!res || !res.success) {
+                        document.getElementById('homeLoading').textContent =
+                            '⚠️ Could not load data' + (res && res.message ? ': ' + res.message : '.');
+                        return;
+                    }
+                    _populateHomeForm(res);
+                    document.getElementById('homeContent').style.display = 'block';
+                    _homeLoaded = true;
+                })
+                .withFailureHandler(function (err) {
+                    document.getElementById('homeLoading').textContent =
+                        '❌ Error: ' + (err.message || 'Unknown error');
+                })
+                .getHomeConfig();
+        }
+
+        function _populateHomeForm(d) {
+            document.getElementById('homeAddress').value   = d.address   || '';
+            document.getElementById('homeSp1Name').value   = d.sp1Name   || '';
+            document.getElementById('homeSp1Email').value  = d.sp1Email  || '';
+            document.getElementById('homeSp1Balance').value = d.sp1Balance !== undefined ? d.sp1Balance : '';
+            document.getElementById('homeSp2Name').value   = d.sp2Name   || '';
+            document.getElementById('homeSp2Email').value  = d.sp2Email  || '';
+            document.getElementById('homeSp2Balance').value = d.sp2Balance !== undefined ? d.sp2Balance : '';
+
+            var s1 = parseFloat(d.sp1Split) || 0;
+            var s2 = parseFloat(d.sp2Split) || 0;
+            document.getElementById('splitSp1').value = s1;
+            document.getElementById('splitSp2').value = s2;
+            _updateSplitBar(s1, s2);
+
+            // Update section titles and split labels with real names
+            var n1 = d.sp1Name || 'Person 1';
+            var n2 = d.sp2Name || 'Person 2';
+            document.getElementById('homeSp1Title').textContent = n1;
+            document.getElementById('homeSp2Title').textContent = n2;
+            document.getElementById('splitLabel1').textContent  = n1;
+            document.getElementById('splitLabel2').textContent  = n2;
+        }
+
+        function _updateSplitBar(s1, s2) {
+            var p1 = Math.min(100, Math.max(0, s1));
+            var p2 = 100 - p1;
+            var bar1 = document.getElementById('splitBarSp1');
+            var bar2 = document.getElementById('splitBarSp2');
+            bar1.style.width = p1 + '%';
+            bar2.style.width = p2 + '%';
+            bar1.textContent = p1 > 8 ? p1 + '%' : '';
+            bar2.textContent = p2 > 8 ? p2 + '%' : '';
+        }
+
+        // Wire up split inputs — changing one mirrors the other to 100 - x
+        (function () {
+            function onSp1Change() {
+                var v = parseFloat(document.getElementById('splitSp1').value);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 100) v = 100;
+                var other = +(100 - v).toFixed(2);
+                document.getElementById('splitSp2').value = other;
+                _updateSplitBar(v, other);
+            }
+            function onSp2Change() {
+                var v = parseFloat(document.getElementById('splitSp2').value);
+                if (isNaN(v) || v < 0) v = 0;
+                if (v > 100) v = 100;
+                var other = +(100 - v).toFixed(2);
+                document.getElementById('splitSp1').value = other;
+                _updateSplitBar(other, v);
+            }
+            document.getElementById('splitSp1').addEventListener('input', onSp1Change);
+            document.getElementById('splitSp2').addEventListener('input', onSp2Change);
+
+            // Also update section headers as names are typed
+            document.getElementById('homeSp1Name').addEventListener('input', function () {
+                var n = this.value.trim() || 'Person 1';
+                document.getElementById('homeSp1Title').textContent = n;
+                document.getElementById('splitLabel1').textContent  = n;
+            });
+            document.getElementById('homeSp2Name').addEventListener('input', function () {
+                var n = this.value.trim() || 'Person 2';
+                document.getElementById('homeSp2Title').textContent = n;
+                document.getElementById('splitLabel2').textContent  = n;
+            });
+        })();
+
+        function saveHomeConfig() {
+            var btn  = document.getElementById('homeSaveBtn');
+            var text = document.getElementById('homeSaveBtnText');
+            var status = document.getElementById('homeStatus');
+
+            var s1 = parseFloat(document.getElementById('splitSp1').value);
+            var s2 = parseFloat(document.getElementById('splitSp2').value);
+            if (isNaN(s1) || isNaN(s2) || Math.abs(s1 + s2 - 100) > 0.01) {
+                status.textContent = '⚠️ Split percentages must sum to 100%.';
+                status.className = 'home-status err';
+                return;
+            }
+
+            btn.disabled = true;
+            text.textContent = 'Saving…';
+            status.textContent = '';
+            status.className = 'home-status';
+
+            var data = {
+                address:    document.getElementById('homeAddress').value.trim(),
+                sp1Name:    document.getElementById('homeSp1Name').value.trim(),
+                sp2Name:    document.getElementById('homeSp2Name').value.trim(),
+                sp1Email:   document.getElementById('homeSp1Email').value.trim(),
+                sp2Email:   document.getElementById('homeSp2Email').value.trim(),
+                sp1Balance: parseFloat(document.getElementById('homeSp1Balance').value) || 0,
+                sp2Balance: parseFloat(document.getElementById('homeSp2Balance').value) || 0,
+                sp1Split:   s1,
+                sp2Split:   s2
+            };
+
+            google.script.run
+                .withSuccessHandler(function (res) {
+                    btn.disabled = false;
+                    text.textContent = 'Save Changes';
+                    if (res && res.success) {
+                        status.textContent = '✓ ' + res.message;
+                        status.className = 'home-status ok';
+                        // Refresh the page's spouse names used elsewhere
+                        _homeLoaded = true;
+                    } else {
+                        status.textContent = '⚠️ ' + (res ? res.message : 'Unknown error.');
+                        status.className = 'home-status err';
+                    }
+                    setTimeout(function () { status.textContent = ''; status.className = 'home-status'; }, 4000);
+                })
+                .withFailureHandler(function (err) {
+                    btn.disabled = false;
+                    text.textContent = 'Save Changes';
+                    status.textContent = '❌ ' + (err.message || 'Save failed.');
+                    status.className = 'home-status err';
+                })
+                .saveHomeConfig(data);
+        }
     </script>
 </body>
 
