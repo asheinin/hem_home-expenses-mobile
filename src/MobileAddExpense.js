@@ -745,8 +745,8 @@ function getHomeConfig() {
             sp2Email:   sp2Email   ? sp2Email.toString()   : '',
             sp1Balance: parseFloat(sp1Balance) || 0,
             sp2Balance: parseFloat(sp2Balance) || 0,
-            sp1Split:   parseFloat(sp1Split)   || 0,
-            sp2Split:   parseFloat(sp2Split)   || 0
+            sp1Split:   parseFloat(sp1Split) * 100 || 0,
+            sp2Split:   parseFloat(sp2Split) * 100 || 0
         };
     } catch (err) {
         Logger.log(err);
@@ -779,8 +779,8 @@ function saveHomeConfig(data) {
         dash.getRange(n.dashEmailsRow,   n.dashSpouse2NameColumn).setValue(data.sp2Email || '');
         dash.getRange(n.dashBalancesRow, n.dashSpouse1NameColumn).setValue(parseFloat(data.sp1Balance) || 0);
         dash.getRange(n.dashBalancesRow, n.dashSpouse2NameColumn).setValue(parseFloat(data.sp2Balance) || 0);
-        dash.getRange(n.dashSplitRow,    n.dashSp1SplitColumn).setValue(s1);
-        dash.getRange(n.dashSplitRow,    n.dashSp2SplitColumn).setValue(s2);
+        dash.getRange(n.dashSplitRow,    n.dashSp1SplitColumn).setValue(s1 / 100);
+        dash.getRange(n.dashSplitRow,    n.dashSp2SplitColumn).setValue(s2 / 100);
 
         return { success: true, message: 'Home configuration saved.' };
     } catch (err) {

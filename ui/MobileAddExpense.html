@@ -1506,8 +1506,7 @@
                             <div class="dots-menu-item" onclick="openRefModal()">📋 This Month's Expenses</div>
                             <div class="dots-menu-item" onclick="openAnalysisSheet()">🤖 AI Expense Analysis</div>
                             <div class="dots-menu-item" onclick="openHomeSheet()">🏠 My Home</div>
-                            <a class="dots-menu-item" href="<?= ScriptApp.getService().getUrl() ?>?page=settings" target="_top"
-                                style="text-decoration:none;color:inherit;">Settings</a>
+                            <div class="dots-menu-item" onclick="window.top.location.href='<?= ScriptApp.getService().getUrl() ?>?page=settings'">Settings</div>
                         </div>
                     </div>
                 </div>
