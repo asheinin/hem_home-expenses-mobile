@@ -1386,6 +1386,22 @@
             overflow: hidden;
             margin-bottom: 14px;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: ew-resize;
+        }
+        .split-bar-thumb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 22px;
+            background: white;
+            border-radius: 2px;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+            pointer-events: none;
         }
         .split-bar-sp1 {
             position: absolute;
@@ -1750,7 +1766,7 @@
                         <input type="email" id="homeSp1Email" placeholder="email@example.com" autocomplete="off" inputmode="email">
                     </div>
                     <div class="home-field">
-                        <label class="home-field-label" for="homeSp1Balance">Balance</label>
+                        <label class="home-field-label" for="homeSp1Balance">Start with, $</label>
                         <span class="home-prefix">$</span>
                         <input type="text" id="homeSp1Balance" placeholder="0.00" inputmode="decimal" autocomplete="off">
                     </div>
@@ -1782,9 +1798,12 @@
                             <span class="split-name-label" id="splitLabel1">Person 1</span>
                             <span class="split-name-label" id="splitLabel2">Person 2</span>
                         </div>
-                        <div class="split-bar-wrap" id="splitBar">
+                        <div class="split-bar-wrap" id="splitBar" role="slider"
+                             aria-label="Expense split percentage"
+                             aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
                             <div class="split-bar-sp1" id="splitBarSp1">50%</div>
                             <div class="split-bar-sp2" id="splitBarSp2">50%</div>
+                            <div class="split-bar-thumb" id="splitBarThumb"></div>
                         </div>
                         <div class="split-inputs">
                             <div class="split-input-box">
@@ -2777,8 +2796,6 @@
             _updateSplitBar(s1, s2);
             var n1 = d.sp1Name || 'Person 1';
             var n2 = d.sp2Name || 'Person 2';
-            document.getElementById('homeSp1Title').textContent = n1;
-            document.getElementById('homeSp2Title').textContent = n2;
             document.getElementById('splitLabel1').textContent  = n1;
             document.getElementById('splitLabel2').textContent  = n2;
             // Take snapshot for dirty tracking
@@ -2805,6 +2822,10 @@
             bar2.style.width = p2 + '%';
             bar1.textContent = p1 > 8 ? p1 + '%' : '';
             bar2.textContent = p2 > 8 ? p2 + '%' : '';
+            var thumb = document.getElementById('splitBarThumb');
+            if (thumb) thumb.style.left = p1 + '%';
+            var bar = document.getElementById('splitBar');
+            if (bar) bar.setAttribute('aria-valuenow', String(p1));
         }
 
         // Wire up split inputs — changing one mirrors the other to 100 - x
@@ -2830,18 +2851,51 @@
             document.getElementById('splitSp1').addEventListener('input', onSp1Change);
             document.getElementById('splitSp2').addEventListener('input', onSp2Change);
 
+            // Drag-to-slide on the split bar (snaps to 5% steps)
+            var bar = document.getElementById('splitBar');
+            var dragging = false;
+            function pctFromEvent(e) {
+                var rect = bar.getBoundingClientRect();
+                var raw = ((e.clientX - rect.left) / rect.width) * 100;
+                var snapped = Math.round(raw / 5) * 5;
+                return Math.min(100, Math.max(0, snapped));
+            }
+            function applyDrag(e) {
+                var s1 = pctFromEvent(e);
+                var s2 = 100 - s1;
+                document.getElementById('splitSp1').value = s1;
+                document.getElementById('splitSp2').value = s2;
+                _updateSplitBar(s1, s2);
+                _homeRefreshSaveBtn();
+            }
+            bar.addEventListener('pointerdown', function (e) {
+                dragging = true;
+                bar.setPointerCapture(e.pointerId);
+                applyDrag(e);
+            });
+            bar.addEventListener('pointermove', function (e) {
+                if (dragging) applyDrag(e);
+            });
+            function endDrag(e) {
+                if (!dragging) return;
+                dragging = false;
+                if (bar.hasPointerCapture && bar.hasPointerCapture(e.pointerId)) {
+                    bar.releasePointerCapture(e.pointerId);
+                }
+            }
+            bar.addEventListener('pointerup', endDrag);
+            bar.addEventListener('pointercancel', endDrag);
+
             var homeInputIds = ['homeAddress','homeSp1Name','homeSp1Email','homeSp1Balance',
                                 'homeSp2Name','homeSp2Email','homeSp2Balance'];
             homeInputIds.forEach(function(id) {
                 document.getElementById(id).addEventListener('input', function() {
                     if (id === 'homeSp1Name') {
                         var n = this.value.trim() || 'Person 1';
-                        document.getElementById('homeSp1Title').textContent = n;
                         document.getElementById('splitLabel1').textContent  = n;
                     }
                     if (id === 'homeSp2Name') {
                         var n = this.value.trim() || 'Person 2';
-                        document.getElementById('homeSp2Title').textContent = n;
                         document.getElementById('splitLabel2').textContent  = n;
                     }
                     _homeRefreshSaveBtn();
