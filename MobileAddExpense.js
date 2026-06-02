@@ -114,6 +114,11 @@ function doGet(e) {
     if (page === 'settings') {
         return _serveSettings();
     }
+    if (page === 'privacy') {
+        return HtmlService.createHtmlOutputFromFile('PrivacyPolicy')
+            .setTitle('Privacy Policy · Home Expenses Mobile')
+            .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no');
+    }
     return _serveMain();
 }
 
