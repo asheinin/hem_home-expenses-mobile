@@ -78,5 +78,12 @@ class staticNumbers {
         this.agentApiKey = 'GEMINI_API_KEY';
         this.agentModel = 'gemini-2.5-flash';
         this.agentUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + this.agentModel + ':generateContent?key='
+
+        // Privacy Policy, Support and App Info
+        this.privacyPolicyUrl = 'https://github.com/asheinin/hem_home-expenses-mobile/blob/main/PrivacyPolicy.html';
+        this.supportEmail = 'galaxsolutions@gmail.com';
+        this.appVersion = '0.0.1';
+        this.appName = 'Home Expenses Mobile';
+        this.appDeveloper = 'Galaxsolutions';
     }
 }
