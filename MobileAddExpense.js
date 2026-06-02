@@ -136,6 +136,15 @@ function _serveMain() {
         errTemplate.expensePeriods = [];
         errTemplate.spouseNames = [];
         errTemplate.configError = err.message;
+        errTemplate.spreadsheetName = '';
+        errTemplate.currentDateStr = '';
+        errTemplate.nameCategoryMap = {};
+        errTemplate.manifestBase64 = _getBase64Manifest();
+        errTemplate.appName = myNumbers.appName;
+        errTemplate.appVersion = myNumbers.appVersion;
+        errTemplate.appDeveloper = myNumbers.appDeveloper;
+        errTemplate.supportEmail = myNumbers.supportEmail;
+        errTemplate.privacyPolicyUrl = myNumbers.privacyPolicyUrl;
         return errTemplate
             .evaluate()
             .setTitle('Add Expense · Home Expenses')
@@ -209,6 +218,11 @@ function _serveMain() {
     template.configError = null;
     template.spreadsheetName = ss.getName();
     template.manifestBase64 = _getBase64Manifest();
+    template.appName = myNumbers.appName;
+    template.appVersion = myNumbers.appVersion;
+    template.appDeveloper = myNumbers.appDeveloper;
+    template.supportEmail = myNumbers.supportEmail;
+    template.privacyPolicyUrl = myNumbers.privacyPolicyUrl;
 
     return template
         .evaluate()

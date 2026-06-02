@@ -1523,6 +1523,7 @@
                             <div class="dots-menu-item" onclick="openAnalysisSheet()">🤖 AI Expense Analysis</div>
                             <div class="dots-menu-item" onclick="openHomeSheet()">🏠 My Home</div>
                             <div class="dots-menu-item" onclick="openSettingsSheet()">⚙️ Settings</div>
+                            <div class="dots-menu-item" onclick="openAboutSheet()">ℹ️ About</div>
                         </div>
                     </div>
                 </div>
@@ -1892,12 +1893,56 @@
                 </div>
                 <div id="sSwitchAlert" style="display:none;font-size:12px;font-weight:500;padding:8px 16px;"></div>
             </div>
-            <!-- About & Privacy Policy -->
-            <div class="home-section" style="margin-bottom:24px;">
-                <div class="home-section-title">About</div>
-                <div style="padding:14px 16px;font-size:13px;color:var(--muted);line-height:1.5;">
-                    Home Expenses Mobile is a personal finance tool. View the <a href="<?= ScriptApp.getService().getUrl() ?>?page=privacy" target="_blank" style="color:var(--primary);text-decoration:none;font-weight:600;">Privacy Policy</a>.
+        </div>
+    </div>
+
+    <!-- About bottom sheet -->
+    <div class="ref-overlay" id="aboutOverlay" onclick="closeAboutSheet()"></div>
+    <div class="home-sheet" id="aboutSheet">
+        <div class="home-sheet-handle"></div>
+        <div class="home-sheet-header">
+            <span class="home-sheet-title">ℹ️ About</span>
+            <button class="home-close-btn" onclick="closeAboutSheet()" aria-label="Close">✕</button>
+        </div>
+        <div class="home-sheet-body">
+            <!-- App Info -->
+            <div class="home-section">
+                <div class="home-section-title">App Info</div>
+                <div style="display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid #f0f0f5;">
+                    <img src="https://lh3.googleusercontent.com/d/1GyoYGc2ldx_mCHklAEjFVDG0wrMeQODD" alt="App Icon" style="width:52px;height:52px;border-radius:12px;flex-shrink:0;">
+                    <div>
+                        <div style="font-size:16px;font-weight:700;color:var(--text);"><?= appName ?></div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Version <?= appVersion ?></div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:1px;">By <?= appDeveloper ?></div>
+                    </div>
                 </div>
+            </div>
+            <!-- Privacy Policy -->
+            <div class="home-section">
+                <div class="home-section-title">Legal</div>
+                <a href="<?= ScriptApp.getService().getUrl() ?>?page=privacy" target="_blank"
+                   style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;text-decoration:none;border-bottom:1px solid #f0f0f5;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:18px;">🔏</span>
+                        <div style="font-size:14px;font-weight:500;color:var(--text);">Privacy Policy</div>
+                    </div>
+                    <span style="font-size:16px;color:var(--muted);">›</span>
+                </a>
+            </div>
+            <!-- Support -->
+            <div class="home-section" style="margin-bottom:24px;">
+                <div class="home-section-title">Support</div>
+                <a href="mailto:<?= supportEmail ?>" target="_blank"
+                   style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;text-decoration:none;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:18px;">✉️</span>
+                        <div>
+                            <div style="font-size:14px;font-weight:500;color:var(--text);">Contact Developer</div>
+                            <div style="font-size:12px;color:var(--muted);margin-top:2px;"><?= supportEmail ?></div>
+                        </div>
+                    </div>
+                    <span style="font-size:16px;color:var(--muted);">›</span>
+                </a>
             </div>
         </div>
     </div>
@@ -2980,6 +3025,18 @@
         function closeSettingsSheet() {
             document.getElementById('settingsOverlay').classList.remove('open');
             document.getElementById('settingsSheet').classList.remove('open');
+        }
+
+        // ── About sheet ───────────────────────────────────────────────────────────
+        function openAboutSheet() {
+            document.getElementById('dotsMenu').classList.remove('open');
+            document.getElementById('aboutOverlay').classList.add('open');
+            document.getElementById('aboutSheet').classList.add('open');
+        }
+
+        function closeAboutSheet() {
+            document.getElementById('aboutOverlay').classList.remove('open');
+            document.getElementById('aboutSheet').classList.remove('open');
         }
 
         function _loadSettings() {
