@@ -4,19 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Home Expenses Mobile</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Privacy Policy · Home Expenses Mobile</title>
+    <meta name="description" content="Privacy Policy for Home Expenses Mobile by GalaxSolutions — a personal transaction recording app powered by Google Apps Script.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #38bdf8;
-            --border: #334155;
-            --accent-glow: rgba(56, 189, 248, 0.15);
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --text: #1a1a2e;
+            --muted: #6b7280;
+            --bg: #f0f2ff;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #10b981;
+            --radius: 14px;
         }
 
         * {
@@ -26,234 +28,399 @@
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.6;
-            padding: 40px 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 32px 16px 56px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
         }
 
-        .container {
-            max-width: 800px;
+        /* ── Outer wrapper ── */
+        .page-wrapper {
             width: 100%;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
+            max-width: 760px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            overflow: hidden;
         }
 
-        header {
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
+        /* ── Header band (matches app's card-header) ── */
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 28px 28px 24px;
+            color: white;
         }
 
-        h1 {
-            font-size: 2.5rem;
+        .card-header h1 {
+            font-size: 22px;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .subtitle {
-            color: var(--accent);
+        .card-header .subtitle {
+            font-size: 13px;
+            opacity: 0.82;
             font-weight: 500;
-            font-size: 1.1rem;
+            margin-bottom: 12px;
         }
 
-        .last-updated {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 8px;
+        .meta-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
         }
 
+        .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+            white-space: nowrap;
+        }
+
+        /* ── Body ── */
+        .card-body {
+            padding: 28px 28px 36px;
+        }
+
+        /* ── Sections ── */
         section {
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
         h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
             margin-bottom: 12px;
-            position: relative;
-            padding-left: 15px;
-        }
-
-        h2::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 18px;
-            background-color: var(--accent);
-            border-radius: 2px;
         }
 
         p {
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            font-size: 1rem;
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.65;
+            margin-bottom: 12px;
         }
 
-        ul {
-            list-style-type: none;
-            margin-bottom: 16px;
-            padding-left: 5px;
-        }
-
-        li {
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            position: relative;
-            padding-left: 20px;
-        }
-
-        li::before {
-            content: '✦';
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-            font-size: 0.8rem;
-            top: 2px;
-        }
-
-        .highlight-box {
-            background-color: var(--accent-glow);
-            border-left: 4px solid var(--accent);
-            border-radius: 0 12px 12px 0;
-            padding: 20px;
-            margin: 25px 0;
-        }
-
-        .highlight-box p {
-            color: var(--text-primary);
-            font-weight: 500;
+        p:last-child {
             margin-bottom: 0;
         }
 
-        footer {
-            margin-top: 40px;
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            padding-left: 18px;
+            position: relative;
+        }
+
+        li::before {
+            content: '·';
+            position: absolute;
+            left: 4px;
+            color: var(--primary);
+            font-size: 1.4em;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        strong {
+            color: var(--text);
+            font-weight: 600;
         }
 
         a {
-            color: var(--accent);
+            color: var(--primary);
             text-decoration: none;
-            transition: color 0.2s ease;
+            font-weight: 500;
+            transition: color 0.15s;
         }
 
         a:hover {
-            color: var(--text-primary);
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
+        /* ── Section card (inner) ── */
+        .section-card {
+            background: #f8f9ff;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 28px;
+        }
+
+        /* ── Info highlight box (matches app's stat cards) ── */
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
+            border: 1.5px solid rgba(102, 126, 234, 0.25);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin: 20px 0;
+        }
+
+        .highlight-box p {
+            color: var(--text);
+            font-size: 13.5px;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        /* ── Warning / disclaimer box ── */
+        .warning-box {
+            background: #fef2f2;
+            border: 1.5px solid #fecaca;
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin: 20px 0;
+        }
+
+        .warning-box p {
+            color: #7f1d1d;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        /* ── Footer ── */
+        .card-footer {
+            background: #f8f9ff;
+            border-top: 1.5px solid var(--border);
+            padding: 18px 28px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ── Responsive ── */
         @media (max-width: 600px) {
             body {
-                padding: 20px 10px;
+                padding: 0;
+                background: var(--card);
             }
 
-            .container {
-                padding: 24px;
+            .page-wrapper {
+                max-width: 100%;
             }
 
-            h1 {
-                font-size: 2rem;
+            .card {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .card-header {
+                border-radius: 0;
+                padding: 24px 18px 20px;
+            }
+
+            .card-body {
+                padding: 20px 18px 32px;
+            }
+
+            .card-footer {
+                padding: 16px 18px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>Privacy Policy</h1>
-            <div class="subtitle">Home Expenses Mobile</div>
-            <div class="last-updated">Last updated: June 2, 2026</div>
-        </header>
+    <div class="page-wrapper">
+        <div class="card">
 
-        <section>
-            <h2>Overview</h2>
-            <p><strong>Home Expenses Mobile</strong> is a personal, private mobile web application designed to help you
-                easily enter expense entries into your personal Google Sheets spreadsheet. This application runs
-                entirely within your own Google Account environment using Google Apps Script. We do not host, store, or
-                transmit your private information to any external servers.</p>
-        </section>
+            <!-- Header -->
+            <div class="card-header">
+                <h1>🔒 Privacy Policy</h1>
+                <div class="subtitle">Home Expenses Mobile · A GalaxSolutions App</div>
+                <div class="meta-pills">
+                    <span class="meta-pill">📅 Last updated: June 2, 2026</span>
+                    <span class="meta-pill">🏢 Operated by GalaxSolutions</span>
+                    <span class="meta-pill">📝 Transaction Recording Only</span>
+                </div>
+            </div>
 
-        <section>
-            <h2>Data We Access & Request</h2>
-            <p>To provide its core functionalities, the application requests access to the following Google User Data
-                scopes:</p>
-            <ul>
-                <li><strong>Google Sheets (Spreadsheet access):</strong> To read category structures, read connected
-                    spreadsheet names, and append expense rows (One-Time and Recurrent mode) directly to your active
-                    sheet.</li>
-                <li><strong>Google Drive:</strong> To locate and automatically connect to your <em>Home Expenses
-                        YYYY</em> spreadsheets (specifically for the optional Jan 1st Auto Year-Switch feature).</li>
-                <li><strong>External Requests (Gemini API):</strong> If (and only if) you explicitly enable "AI
-                    Insights" in the app's settings and provide your own Gemini API Key, the application makes external
-                    API calls to Google's Gemini models to generate financial analysis. No other external connections or
-                    tracking scripts are loaded.</li>
-            </ul>
-        </section>
+            <!-- Body -->
+            <div class="card-body">
 
-        <section>
-            <h2>How Your Data is Handled and Stored</h2>
-            <ul>
-                <li><strong>Zero Server-Side Hosting:</strong> There is no central server, database, or third-party
-                    storage. All operational code runs either on Google's own Apps Script servers under your
-                    credentials, or locally within your web browser.</li>
-                <li><strong>Local Storage & Script Properties:</strong> The ID of your chosen spreadsheet and
-                    configuration preferences (like toggling AI insights or Year-Switch) are stored in Google's secure
-                    <strong>Apps Script User/Script Properties</strong> and your browser's local/session storage.
-                </li>
-                <li><strong>Your Spreadsheets:</strong> Your financial data never leaves your Google account unless you
-                    configure AI analytics, in which case selected monthly aggregate numbers are sent securely via HTTPS
-                    directly to Google's Gemini API endpoint.</li>
-            </ul>
-        </section>
+                <section>
+                    <h2>Overview</h2>
+                    <p><strong>Home Expenses Mobile</strong> is a personal, private mobile web application designed to
+                        help you easily enter expense entries into your personal Google Sheets spreadsheet. This
+                        application runs entirely within your own Google Account environment using Google Apps Script.
+                        We do not host, store, or transmit your private information to any external servers.</p>
+                </section>
 
-        <div class="highlight-box">
-            <p><strong>Google API Limited Use Disclosure:</strong><br>
-                Home Expenses Mobile's use and transfer to any other app of information received from Google APIs will
-                adhere to <a href="https://developers.google.com/terms/api-services-user-data-policy"
-                    target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements.
-            </p>
-        </div>
+                <div class="divider"></div>
 
-        <section>
-            <h2>User Controls and Data Deletion</h2>
-            <p>Since all data is stored inside your own Google Drive and Google Sheets, you are in complete control of
-                your data:</p>
-            <ul>
-                <li>You can inspect, modify, or delete your expense entries at any time directly inside your Google
-                    Sheets.</li>
-                <li>You can disconnect or delete the application from your Google Account entirely by visiting your
-                    Google Account's <a href="https://myaccount.google.com/permissions" target="_blank">Third-Party
-                        Access</a> settings page and revoking permissions.</li>
-            </ul>
-        </section>
+                <section>
+                    <h2>No Payment Processing</h2>
+                    <p>Home Expenses Mobile is strictly a <strong>transaction recording application</strong>. It does
+                        <strong>not</strong> process, initiate, transmit, or facilitate any actual financial
+                        transactions, payments, bank transfers, or monetary exchanges of any kind.
+                    </p>
+                    <p>All figures entered into the application are purely for personal bookkeeping and record-keeping
+                        purposes only. No real money is moved, charged, or transferred through this application.
+                        GalaxSolutions bears no responsibility for any financial decisions made based on information
+                        recorded within the app.</p>
+                </section>
 
-        <section>
-            <h2>Contact & Support</h2>
-            <p>If you have any questions, feedback, or concerns regarding this privacy policy or the application's data
-                handling, please contact the developer at: <a
-                    href="mailto:galaxsolutions@gmail.com">galaxsolutions@gmail.com</a>.</p>
-        </section>
+                <div class="divider"></div>
 
-        <footer>
-            <p>&copy; GalaxSolutions 2026. All rights reserved.</p>
-        </footer>
-    </div>
+                <section>
+                    <h2>Data We Access &amp; Request</h2>
+                    <p>To provide its core functionalities, the application requests access to the following Google
+                        User Data scopes:</p>
+                    <ul>
+                        <li><strong>Google Sheets (Spreadsheet access):</strong> To read category structures, read
+                            connected spreadsheet names, and append expense rows (One-Time and Recurrent mode) directly
+                            to your active sheet.</li>
+                        <li><strong>Google Drive:</strong> To locate and automatically connect to your <em>Home
+                                Expenses YYYY</em> spreadsheets (specifically for the optional Jan 1st Auto
+                            Year-Switch feature).</li>
+                        <li><strong>External Requests (Gemini API):</strong> If (and only if) you explicitly enable
+                            "AI Insights" in the app's settings and provide your own Gemini API Key, the application
+                            makes external API calls to Google's Gemini models to generate financial analysis. No other
+                            external connections or tracking scripts are loaded.</li>
+                    </ul>
+                </section>
+
+                <div class="divider"></div>
+
+                <section>
+                    <h2>How Your Data is Handled and Stored</h2>
+                    <ul>
+                        <li><strong>Zero Server-Side Hosting:</strong> There is no central server, database, or
+                            third-party storage. All operational code runs either on Google's own Apps Script servers
+                            under your credentials, or locally within your web browser.</li>
+                        <li><strong>Local Storage &amp; Script Properties:</strong> The ID of your chosen spreadsheet
+                            and configuration preferences (like toggling AI insights or Year-Switch) are stored in
+                            Google's secure <strong>Apps Script User/Script Properties</strong> and your browser's
+                            local/session storage.</li>
+                        <li><strong>Your Spreadsheets:</strong> Your financial data never leaves your Google account
+                            unless you configure AI analytics, in which case selected monthly aggregate numbers are
+                            sent securely via HTTPS directly to Google's Gemini API endpoint.</li>
+                    </ul>
+                </section>
+
+                <div class="highlight-box">
+                    <p><strong>🔗 Google API Limited Use Disclosure</strong><br>
+                        Home Expenses Mobile's use and transfer to any other app of information received from Google
+                        APIs will adhere to the <a
+                            href="https://developers.google.com/terms/api-services-user-data-policy"
+                            target="_blank">Google API Services User Data Policy</a>, including the Limited Use
+                        requirements.
+                    </p>
+                </div>
+
+                <div class="divider"></div>
+
+                <section>
+                    <h2>Disclaimer of Liability</h2>
+                    <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, GALAXSOLUTIONS, ITS DEVELOPERS,
+                            AFFILIATES, OFFICERS, AND AGENTS (COLLECTIVELY, "GALAXSOLUTIONS") EXPRESSLY DISCLAIM ALL
+                            WARRANTIES, EXPRESS OR IMPLIED, AND SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT,
+                            INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY KIND ARISING OUT
+                            OF OR IN CONNECTION WITH YOUR USE OF, OR INABILITY TO USE, HOME EXPENSES MOBILE.</strong>
+                    </p>
+                    <p>Without limiting the foregoing, GalaxSolutions is not liable for:</p>
+                    <ul>
+                        <li><strong>Data Loss or Corruption:</strong> Any loss, alteration, or corruption of data in
+                            your Google Sheets or local browser storage.</li>
+                        <li><strong>Financial Decisions:</strong> Any financial decisions, losses, or outcomes made in
+                            reliance on records entered into or generated by the application.</li>
+                        <li><strong>Third-Party Services:</strong> Any issues, outages, breaches, or policy changes
+                            arising from Google Workspace, Google Apps Script, Google Drive, Google Sheets, or the
+                            Gemini API — services operated entirely by Google LLC, not GalaxSolutions.</li>
+                        <li><strong>Unauthorized Access:</strong> Any unauthorized access to your Google Account,
+                            spreadsheets, or data. Security of your Google Account is solely your responsibility.</li>
+                        <li><strong>Application Availability:</strong> Any interruptions, bugs, downtime, or
+                            discontinuation of the application.</li>
+                    </ul>
+
+                    <div class="warning-box">
+                        <p><strong>⚖️ Legal Claims &amp; Indemnification</strong><br>
+                            By using Home Expenses Mobile, you agree to hold GalaxSolutions harmless from and against
+                            any and all claims, liabilities, damages, losses, costs, and expenses (including reasonable
+                            legal fees) arising out of or related to your use of the application. You agree not to
+                            bring any legal action, lawsuit, or proceeding against GalaxSolutions in connection with
+                            the application. This application is provided <em>"as is"</em> and <em>"as
+                                available"</em> without warranty of any kind.
+                        </p>
+                    </div>
+
+                    <p>Some jurisdictions do not allow the exclusion of certain warranties or limitation of liability.
+                        In such jurisdictions, GalaxSolutions' liability shall be limited to the fullest extent
+                        permitted by applicable law.</p>
+                </section>
+
+                <div class="divider"></div>
+
+                <section>
+                    <h2>User Controls and Data Deletion</h2>
+                    <p>Since all data is stored inside your own Google Drive and Google Sheets, you are in complete
+                        control of your data:</p>
+                    <ul>
+                        <li>You can inspect, modify, or delete your expense entries at any time directly inside your
+                            Google Sheets.</li>
+                        <li>You can disconnect or delete the application from your Google Account entirely by visiting
+                            your Google Account's <a href="https://myaccount.google.com/permissions"
+                                target="_blank">Third-Party Access</a> settings page and revoking permissions.</li>
+                    </ul>
+                </section>
+
+                <div class="divider"></div>
+
+                <section>
+                    <h2>Contact &amp; Support</h2>
+                    <p>If you have any questions, feedback, or concerns regarding this privacy policy or the
+                        application's data handling, please contact the developer at: <a
+                            href="mailto:galaxsolutions@gmail.com">galaxsolutions@gmail.com</a>.</p>
+                </section>
+
+            </div><!-- /card-body -->
+
+            <!-- Footer -->
+            <div class="card-footer">
+                <p>&copy; 2026 <strong>GalaxSolutions</strong>. All rights reserved.</p>
+                <p>Home Expenses Mobile is a product of GalaxSolutions. Use of this application constitutes acceptance of the terms and disclaimers set forth in this Privacy Policy.</p>
+            </div>
+
+        </div><!-- /card -->
+    </div><!-- /page-wrapper -->
 </body>
 
 </html>
