@@ -22,7 +22,12 @@ src/
 ui/
   MobileAddExpense.html  Mobile expense form (OT/RM tabs, ⚙️ settings link)
   Settings.html          Settings page — spreadsheet config + auto year-switch toggle
+
 ```
+
+## TODO
+
+Please find the date column and populate it (in current month only, also for recurrent expenses fill date for current month only) for new expense, or update it for updated existing expense (actually this is last update date
 
 ## One-Time Setup
 
