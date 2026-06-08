@@ -115,7 +115,7 @@ function doGet(e) {
         return _serveSettings();
     }
     if (page === 'privacy') {
-        return HtmlService.createHtmlOutputFromFile('PrivacyPolicy')
+        return HtmlService.createHtmlOutputFromFile('ui/PrivacyPolicy')
             .setTitle('Privacy Policy · Home Expenses Mobile')
             .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no');
     }
@@ -428,14 +428,14 @@ function getMonthCapacity() {
             .getValues();
 
         var descrIdx = myNumbers.expenseDescrColumn - 1;
-        var amtIdx   = myNumbers.expenseAmountColumn - 1;
+        var amtIdx = myNumbers.expenseAmountColumn - 1;
 
-        var usedSlots  = 0;
+        var usedSlots = 0;
         var emptySlots = 0;
 
         values.forEach(function (row) {
             var hasDescr = row[descrIdx] !== '' && row[descrIdx] != null;
-            var hasAmt   = row[amtIdx]   !== '' && row[amtIdx]   != null;
+            var hasAmt = row[amtIdx] !== '' && row[amtIdx] != null;
             if (hasDescr || hasAmt) {
                 usedSlots++;
             } else {
@@ -444,11 +444,11 @@ function getMonthCapacity() {
         });
 
         return {
-            success:    true,
+            success: true,
             totalSlots: numRows,
-            usedSlots:  usedSlots,
+            usedSlots: usedSlots,
             emptySlots: emptySlots,
-            isFull:     emptySlots === 0
+            isFull: emptySlots === 0
         };
     } catch (err) {
         Logger.log(err);
@@ -474,11 +474,11 @@ function getCurrentMonthExpenses() {
 
         var expenses = [];
         values.forEach(function (row) {
-            var name   = (row[myNumbers.expenseDescrColumn  - 1] || '').toString().trim();
-            var type   = (row[myNumbers.expenseTypeColumn   - 1] || '').toString().trim();
-            var amount = row[myNumbers.expenseAmountColumn  - 1];
-            var split  = (row[myNumbers.expenceSplitColumn  - 1] || '').toString().trim() === 'Y';
-            var pap    = (row[myNumbers.expensePAPColumn    - 1] || '').toString().trim() === 'PAP';
+            var name = (row[myNumbers.expenseDescrColumn - 1] || '').toString().trim();
+            var type = (row[myNumbers.expenseTypeColumn - 1] || '').toString().trim();
+            var amount = row[myNumbers.expenseAmountColumn - 1];
+            var split = (row[myNumbers.expenceSplitColumn - 1] || '').toString().trim() === 'Y';
+            var pap = (row[myNumbers.expensePAPColumn - 1] || '').toString().trim() === 'PAP';
             if (name) {
                 var amtStr = (amount !== '' && amount !== null && !isNaN(parseFloat(amount)))
                     ? '$' + parseFloat(amount).toFixed(2)
@@ -564,7 +564,7 @@ function mobileProcessForm(
                 .getRange(myNumbers.expenseFirstRow, myNumbers.expenseDescrColumn, numOfRows)
                 .getValues()
                 .flat();
-            
+
             var types = sheet
                 .getRange(myNumbers.expenseFirstRow, myNumbers.expenseTypeColumn, numOfRows)
                 .getValues()
@@ -664,7 +664,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
-                
+
                 } else {
                     sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
 
@@ -745,27 +745,27 @@ function getHomeConfig() {
         var n = new staticNumbers();
         var dash = _getSpreadsheet().getSheets()[0];
 
-        var address   = dash.getRange(n.dashAddressRow,  n.dashAddressColumn).getValue();
-        var sp1Name   = dash.getRange(n.dashNamesRow,    n.dashSpouse1NameColumn).getValue();
-        var sp2Name   = dash.getRange(n.dashNamesRow,    n.dashSpouse2NameColumn).getValue();
-        var sp1Email  = dash.getRange(n.dashEmailsRow,   n.dashSpouse1NameColumn).getValue();
-        var sp2Email  = dash.getRange(n.dashEmailsRow,   n.dashSpouse2NameColumn).getValue();
+        var address = dash.getRange(n.dashAddressRow, n.dashAddressColumn).getValue();
+        var sp1Name = dash.getRange(n.dashNamesRow, n.dashSpouse1NameColumn).getValue();
+        var sp2Name = dash.getRange(n.dashNamesRow, n.dashSpouse2NameColumn).getValue();
+        var sp1Email = dash.getRange(n.dashEmailsRow, n.dashSpouse1NameColumn).getValue();
+        var sp2Email = dash.getRange(n.dashEmailsRow, n.dashSpouse2NameColumn).getValue();
         var sp1Balance = dash.getRange(n.dashBalancesRow, n.dashSpouse1NameColumn).getValue();
         var sp2Balance = dash.getRange(n.dashBalancesRow, n.dashSpouse2NameColumn).getValue();
-        var sp1Split  = dash.getRange(n.dashSplitRow,    n.dashSp1SplitColumn).getValue();
-        var sp2Split  = dash.getRange(n.dashSplitRow,    n.dashSp2SplitColumn).getValue();
+        var sp1Split = dash.getRange(n.dashSplitRow, n.dashSp1SplitColumn).getValue();
+        var sp2Split = dash.getRange(n.dashSplitRow, n.dashSp2SplitColumn).getValue();
 
         return {
             success: true,
-            address:    address    ? address.toString()    : '',
-            sp1Name:    sp1Name    ? sp1Name.toString()    : '',
-            sp2Name:    sp2Name    ? sp2Name.toString()    : '',
-            sp1Email:   sp1Email   ? sp1Email.toString()   : '',
-            sp2Email:   sp2Email   ? sp2Email.toString()   : '',
+            address: address ? address.toString() : '',
+            sp1Name: sp1Name ? sp1Name.toString() : '',
+            sp2Name: sp2Name ? sp2Name.toString() : '',
+            sp1Email: sp1Email ? sp1Email.toString() : '',
+            sp2Email: sp2Email ? sp2Email.toString() : '',
             sp1Balance: parseFloat(sp1Balance) || 0,
             sp2Balance: parseFloat(sp2Balance) || 0,
-            sp1Split:   parseFloat(sp1Split) * 100 || 0,
-            sp2Split:   parseFloat(sp2Split) * 100 || 0
+            sp1Split: parseFloat(sp1Split) * 100 || 0,
+            sp2Split: parseFloat(sp2Split) * 100 || 0
         };
     } catch (err) {
         Logger.log(err);
@@ -791,15 +791,15 @@ function saveHomeConfig(data) {
             return { success: false, message: 'Split percentages must sum to exactly 100%.' };
         }
 
-        dash.getRange(n.dashAddressRow,  n.dashAddressColumn).setValue(data.address  || '');
-        dash.getRange(n.dashNamesRow,    n.dashSpouse1NameColumn).setValue(data.sp1Name  || '');
-        dash.getRange(n.dashNamesRow,    n.dashSpouse2NameColumn).setValue(data.sp2Name  || '');
-        dash.getRange(n.dashEmailsRow,   n.dashSpouse1NameColumn).setValue(data.sp1Email || '');
-        dash.getRange(n.dashEmailsRow,   n.dashSpouse2NameColumn).setValue(data.sp2Email || '');
+        dash.getRange(n.dashAddressRow, n.dashAddressColumn).setValue(data.address || '');
+        dash.getRange(n.dashNamesRow, n.dashSpouse1NameColumn).setValue(data.sp1Name || '');
+        dash.getRange(n.dashNamesRow, n.dashSpouse2NameColumn).setValue(data.sp2Name || '');
+        dash.getRange(n.dashEmailsRow, n.dashSpouse1NameColumn).setValue(data.sp1Email || '');
+        dash.getRange(n.dashEmailsRow, n.dashSpouse2NameColumn).setValue(data.sp2Email || '');
         dash.getRange(n.dashBalancesRow, n.dashSpouse1NameColumn).setValue(parseFloat(data.sp1Balance) || 0);
         dash.getRange(n.dashBalancesRow, n.dashSpouse2NameColumn).setValue(parseFloat(data.sp2Balance) || 0);
-        dash.getRange(n.dashSplitRow,    n.dashSp1SplitColumn).setValue(s1 / 100);
-        dash.getRange(n.dashSplitRow,    n.dashSp2SplitColumn).setValue(s2 / 100);
+        dash.getRange(n.dashSplitRow, n.dashSp1SplitColumn).setValue(s1 / 100);
+        dash.getRange(n.dashSplitRow, n.dashSp2SplitColumn).setValue(s2 / 100);
 
         return { success: true, message: 'Home configuration saved.' };
     } catch (err) {
