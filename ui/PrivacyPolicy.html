@@ -92,30 +92,6 @@
             white-space: nowrap;
         }
 
-        /* ── Back button ── */
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.18);
-            border: none;
-            border-radius: 100px;
-            padding: 6px 14px 6px 10px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: inherit;
-            color: white;
-            cursor: pointer;
-            margin-bottom: 14px;
-            transition: background 0.15s;
-            text-decoration: none;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.30);
-            color: white;
-            text-decoration: none;
-        }
 
         /* ── Body ── */
         .card-body {
@@ -275,8 +251,6 @@
 
             <!-- Header -->
             <div class="card-header">
-            <!-- Back button -->
-            <a id="backBtn" class="back-btn" href="#" onclick="goBack(); return false;">&#8592; Back to Main Page</a>
             <h1>🔒 Privacy Policy</h1>
                 <div class="subtitle">Home Expenses Mobile · A GalaxSolutions App</div>
                 <div class="meta-pills">
@@ -434,13 +408,6 @@
 
         </div><!-- /card -->
     </div><!-- /page-wrapper -->
-<script>
-    function goBack() {
-        // Strip the ?page=privacy param and go to the app root
-        var url = window.location.href.split('?')[0];
-        window.location.href = url;
-    }
-</script>
 </body>
 
 </html>
