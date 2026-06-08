@@ -29,10 +29,8 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-attachment: fixed;
+            background: var(--card);
             min-height: 100vh;
-            padding: 32px 16px 56px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -41,31 +39,30 @@
         /* ── Outer wrapper ── */
         .page-wrapper {
             width: 100%;
-            max-width: 760px;
+            max-width: 480px;
+            flex-shrink: 0;
         }
 
         /* ── Card ── */
         .card {
             background: var(--card);
-            border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
             overflow: hidden;
         }
 
         /* ── Header band (matches app's card-header) ── */
         .card-header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: 28px 28px 24px;
+            padding: 24px 24px 20px;
             color: white;
         }
 
         .card-header h1 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 4px;
         }
 
         .card-header .subtitle {
@@ -97,7 +94,7 @@
 
         /* ── Body ── */
         .card-body {
-            padding: 28px 28px 36px;
+            padding: 22px 22px 32px;
         }
 
         /* ── Sections ── */
@@ -219,7 +216,7 @@
         .card-footer {
             background: #f8f9ff;
             border-top: 1.5px solid var(--border);
-            padding: 18px 28px;
+            padding: 16px 22px;
             text-align: center;
             font-size: 12px;
             color: var(--muted);
@@ -227,32 +224,21 @@
         }
 
         /* ── Responsive ── */
-        @media (max-width: 600px) {
-            body {
-                padding: 0;
-                background: var(--card);
-            }
-
+        @media (max-width: 480px) {
             .page-wrapper {
                 max-width: 100%;
             }
 
-            .card {
-                border-radius: 0;
-                box-shadow: none;
-            }
-
             .card-header {
-                border-radius: 0;
-                padding: 24px 18px 20px;
+                padding: 20px 18px 18px;
             }
 
             .card-body {
-                padding: 20px 18px 32px;
+                padding: 18px 16px 28px;
             }
 
             .card-footer {
-                padding: 16px 18px;
+                padding: 14px 16px;
             }
         }
     </style>
