@@ -116,7 +116,7 @@ function doGet(e) {
     }
     if (page === 'privacy') {
         return HtmlService.createHtmlOutputFromFile('ui/PrivacyPolicy')
-            .setTitle('Privacy Policy · Home Expenses Mobile')
+            .setTitle('Privacy Policy · Home Expenses')
             .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no');
     }
     return _serveMain();
@@ -147,7 +147,7 @@ function _serveMain() {
         errTemplate.privacyPolicyUrl = myNumbers.privacyPolicyUrl;
         return errTemplate
             .evaluate()
-            .setTitle('Home Expenses Mobile')
+            .setTitle('Home Expenses')
             .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no')
             .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
@@ -226,7 +226,7 @@ function _serveMain() {
 
     return template
         .evaluate()
-        .setTitle('Home Expenses Mobile')
+        .setTitle('Home Expenses')
         .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -256,7 +256,7 @@ function _serveSettings() {
 
     return template
         .evaluate()
-        .setTitle('Settings · Home Expenses Mobile')
+        .setTitle('Settings · Home Expenses')
         .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no')
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

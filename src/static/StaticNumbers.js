@@ -83,7 +83,7 @@ class staticNumbers {
         this.privacyPolicyUrl = 'https://github.com/asheinin/hem_home-expenses-mobile/blob/main/PrivacyPolicy.html';
         this.supportEmail = 'galaxsolutions@gmail.com';
         this.appVersion = '0.0.1';
-        this.appName = 'Home Expenses Mobile';
+        this.appName = 'Home Expenses';
         this.appDeveloper = 'Galaxsolutions';
     }
 }
