@@ -4,7 +4,10 @@
  */
 class staticNumbers {
     constructor() {
+        this.thresholdLimitForClosingMonth = 1;
+
         this.expenseCarryOverRow = 2;
+        this.expenseSpToSpRow = 2;
         this.expenseFirstRow = 3;
         this.expenseLastRow = 50;
         this.expenseTotalAmountRowBeforeSplit = 52;
@@ -22,14 +25,19 @@ class staticNumbers {
         this.expenseDescrColumn = 2;
         this.expenseDateColumn = 3;
         this.expenseAmountColumn = 4;
+        this.expenseCarryOverSp2OwesColumn = 5;
+        this.expenseCarryOverSp1OwesColumn = 6;
         this.expenceSplit2Column = 5;
         this.expenceSplit1Column = 6;
         this.expenceSplitColumn = 7;
         this.expenseFirstPayColumn = 8;
         this.expenseSecondPayColumn = 9;
+        this.expenseInitialBalanceCol = 2;
         this.expencePeriodColumn = 10;
         this.expensePaidColumn = 11;
         this.expensePAPColumn = 12;
+        this.expenseSp2ToSp1Column = 13;
+        this.expenseSp1ToSp2Column = 14;
 
         // Dashboard rows
         this.dashAddressRow = 1;
@@ -62,6 +70,16 @@ class staticNumbers {
         this.dashSp2BalanceColumn = 12;
         this.dashSp1BalanceColumn = 13;
         this.dashColumns = 13;
+
+        // Summary rows/columns
+        this.summaryHeaderRow = 1;
+        this.summarySumRow = 2;
+
+        this.summaryAmountColumn = 3;
+        this.summaryAnalyticsYearColumn = 1;
+        this.summaryAnalyticsDataStartColumn = 4;
+        this.summaryChartsStartColumn = 17;
+        this.summaryAnalyticsMonthColumn = 1;
 
         // Dashboard balance cell color constants
         this.dashBalanceNegativeBgColor = "red";
