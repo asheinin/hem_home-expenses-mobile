@@ -80,6 +80,7 @@ class staticNumbers {
         this.summaryAnalyticsDataStartColumn = 4;
         this.summaryChartsStartColumn = 17;
         this.summaryAnalyticsMonthColumn = 1;
+        this.summaryAnalyticsTotalColumns = 60;
 
         // Dashboard balance cell color constants
         this.dashBalanceNegativeBgColor = "red";
