@@ -801,6 +801,17 @@ function saveHomeConfig(data) {
         dash.getRange(n.dashSplitRow, n.dashSp1SplitColumn).setValue(s1 / 100);
         dash.getRange(n.dashSplitRow, n.dashSp2SplitColumn).setValue(s2 / 100);
 
+        // Propagate to monthly config rows from current month forward
+        var sheets = _getSpreadsheet().getSheets();
+        var currentMonthIndex = new Date().getMonth() + 1; // 1 = January = sheet index 1
+        for (var i = currentMonthIndex; i <= 12; i++) {
+            var monthSheet = sheets[i];
+            if (monthSheet) {
+                monthSheet.getRange(n.monthSplitConfigRow, n.expenceSplit1Column).setValue(s1 / 100);
+                monthSheet.getRange(n.monthSplitConfigRow, n.expenceSplit2Column).setValue(s2 / 100);
+            }
+        }
+
         return { success: true, message: 'Home configuration saved.' };
     } catch (err) {
         Logger.log(err);
