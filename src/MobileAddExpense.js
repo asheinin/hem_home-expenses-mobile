@@ -664,6 +664,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                    if (i === mStart) sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
 
                 } else {
                     sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
@@ -679,6 +680,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                    if (i === mStart) sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
                 }
 
             } else {
@@ -706,6 +708,7 @@ function mobileProcessForm(
                         sheet.getRange(newRow, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                         sheet.getRange(newRow, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                         sheet.getRange(newRow, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                        if (i === mStart) sheet.getRange(newRow, myNumbers.expenseDateColumn).setValue(new Date());
 
                         inserted = true;
                         break;
@@ -800,6 +803,17 @@ function saveHomeConfig(data) {
         dash.getRange(n.dashBalancesRow, n.dashSpouse2NameColumn).setValue(parseFloat(data.sp2Balance) || 0);
         dash.getRange(n.dashSplitRow, n.dashSp1SplitColumn).setValue(s1 / 100);
         dash.getRange(n.dashSplitRow, n.dashSp2SplitColumn).setValue(s2 / 100);
+
+        // Propagate to monthly config rows from current month forward
+        var sheets = _getSpreadsheet().getSheets();
+        var currentMonthIndex = new Date().getMonth() + 1; // 1 = January = sheet index 1
+        for (var i = currentMonthIndex; i <= 12; i++) {
+            var monthSheet = sheets[i];
+            if (monthSheet) {
+                monthSheet.getRange(n.monthSplitConfigRow, n.expenceSplit1Column).setValue(s1 / 100);
+                monthSheet.getRange(n.monthSplitConfigRow, n.expenceSplit2Column).setValue(s2 / 100);
+            }
+        }
 
         return { success: true, message: 'Home configuration saved.' };
     } catch (err) {

@@ -6,6 +6,8 @@ class staticNumbers {
     this.expenseSpToSpRow = 2;
     this.expenseFirstRow = 3;
     this.expenseLastRow = 50;
+    this.monthSplitConfigRow = 51;
+    this.monthSplitLabelColumn = 1;
     this.expenseTotalAmountRowBeforeSplit = 52;
     this.expenseTotalAmountRow = 53;
     this.expenseTotalPaidSp2Row = 56;
