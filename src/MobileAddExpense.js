@@ -664,6 +664,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                    if (i === mStart) sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
 
                 } else {
                     sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
@@ -679,6 +680,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                    if (i === mStart) sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
                 }
 
             } else {
@@ -706,6 +708,7 @@ function mobileProcessForm(
                         sheet.getRange(newRow, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                         sheet.getRange(newRow, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                         sheet.getRange(newRow, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
+                        if (i === mStart) sheet.getRange(newRow, myNumbers.expenseDateColumn).setValue(new Date());
 
                         inserted = true;
                         break;
