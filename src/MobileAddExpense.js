@@ -45,6 +45,23 @@ function _monthName(monthNum) {
 }
 
 /** Extract a spreadsheet ID from a Google Sheets URL, or return as-is if already an ID. */
+// Adds `amount` to a cell while preserving each individual value as a formula:
+// 10 + 5 -> =10+5 ; =10+5 + 7 -> =10+5+7. Empty/zero/non-numeric cells just get the amount.
+function _appendAmountToCell(range, amount) {
+    var term = (amount < 0 ? '-' : '+') + parseFloat(Math.abs(amount).toFixed(2));
+    var formula = range.getFormula();
+    if (formula && formula.charAt(0) === '=') {
+        range.setFormula(formula + term);
+        return;
+    }
+    var current = parseFloat(range.getValue());
+    if (!current) {
+        range.setValue(amount);
+        return;
+    }
+    range.setFormula('=' + parseFloat(current.toFixed(2)) + term);
+}
+
 function _extractId(input) {
     input = input.trim();
     // Match /d/<id>/ or /spreadsheets/d/<id>
@@ -640,9 +657,9 @@ function mobileProcessForm(
 
                 if (actionType === '_update' || isUpdateSimilar || isAddToExisting) {
                     // Accumulate amount
-                    var currentAmt = sheet.getRange(row, myNumbers.expenseAmountColumn).getValue();
-                    var newTotal = (parseFloat(currentAmt) || 0) + (amount !== -1 ? amount : 0);
-                    sheet.getRange(row, myNumbers.expenseAmountColumn).setValue(newTotal);
+                    if (amount !== -1) {
+                        _appendAmountToCell(sheet.getRange(row, myNumbers.expenseAmountColumn), amount);
+                    }
 
                     if (isUpdateSimilar) {
                         var currentName = sheet.getRange(row, myNumbers.expenseDescrColumn).getValue();
@@ -664,7 +681,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
-                    if (i === mStart) sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
+                    sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
 
                 } else {
                     sheet.getRange(row, myNumbers.expenseFirstPayColumn, 1, 2).clearContent();
@@ -680,7 +697,7 @@ function mobileProcessForm(
                     sheet.getRange(row, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                     sheet.getRange(row, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                     sheet.getRange(row, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
-                    if (i === mStart) sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
+                    sheet.getRange(row, myNumbers.expenseDateColumn).setValue(new Date());
                 }
 
             } else {
@@ -708,7 +725,7 @@ function mobileProcessForm(
                         sheet.getRange(newRow, myNumbers.expencePeriodColumn).setValue(expensePeriod);
                         sheet.getRange(newRow, myNumbers.expenceSplitColumn).setValue(split ? 'Y' : 'N');
                         sheet.getRange(newRow, myNumbers.expensePaidColumn).setValue(paid ? 'Y' : '');
-                        if (i === mStart) sheet.getRange(newRow, myNumbers.expenseDateColumn).setValue(new Date());
+                        sheet.getRange(newRow, myNumbers.expenseDateColumn).setValue(new Date());
 
                         inserted = true;
                         break;
