@@ -252,10 +252,27 @@ function _mobileGetSpreadsheetForYear(year) {
     return null;
 }
 
-function _mobileGetMonthStats(ss, monthName, year, myNumbers) {
+function _mobileNormalizeExpenseDay(dateVal, monthIndex, year, daysInMonth) {
+    if (!dateVal) return 1;
+    var d = (dateVal instanceof Date) ? dateVal : new Date(dateVal);
+    if (isNaN(d.getTime())) return 1;
+
+    var firstOfMonth = new Date(year, monthIndex, 1, 0, 0, 0, 0);
+    var lastOfMonth = new Date(year, monthIndex, daysInMonth, 23, 59, 59, 999);
+
+    if (d < firstOfMonth) return 1;
+    if (d > lastOfMonth) return daysInMonth;
+    return d.getDate();
+}
+
+function _mobileGetMonthStats(ss, monthName, year, myNumbers, monthIndex) {
     var sheetName = monthName + ' ' + year;
     var sheet = ss.getSheetByName(sheetName);
     if (!sheet) return null;
+
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var mIdx = (typeof monthIndex === 'number' && monthIndex >= 0) ? monthIndex : months.indexOf(monthName);
+    var daysInMonth = (mIdx >= 0) ? new Date(year, mIdx + 1, 0).getDate() : 31;
 
     var firstRow = myNumbers.expenseFirstRow;
     var lastRow = myNumbers.expenseLastRow;
@@ -264,10 +281,12 @@ function _mobileGetMonthStats(ss, monthName, year, myNumbers) {
     var totalSpend = 0;
     var highestSpend = { description: 'None', amount: 0, category: '' };
     var categoryTotals = {};
+    var entries = [];
 
     data.forEach(function (row) {
         var category = (row[myNumbers.expenseTypeColumn - 1] || 'Uncategorized').toString().trim();
         var description = (row[myNumbers.expenseDescrColumn - 1] || '').toString().trim();
+        var dateVal = row[myNumbers.expenseDateColumn - 1];
         var amount = parseFloat(row[myNumbers.expenseAmountColumn - 1]) || 0;
 
         if (amount > 0) {
@@ -276,6 +295,14 @@ function _mobileGetMonthStats(ss, monthName, year, myNumbers) {
                 highestSpend = { description: description, amount: amount, category: category };
             }
             categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+
+            var normDay = _mobileNormalizeExpenseDay(dateVal, mIdx, year, daysInMonth);
+            entries.push({
+                category: category,
+                description: description,
+                day: normDay,
+                amount: amount
+            });
         }
     });
 
@@ -286,10 +313,16 @@ function _mobileGetMonthStats(ss, monthName, year, myNumbers) {
         }
     }
 
-    return { totalSpend: totalSpend, highestSpend: highestSpend, topCategory: topCategory, categoryTotals: categoryTotals };
+    return {
+        totalSpend: totalSpend,
+        highestSpend: highestSpend,
+        topCategory: topCategory,
+        categoryTotals: categoryTotals,
+        entries: entries
+    };
 }
 
-function _mobileGetMonthlyComparisonData(ss, currentMonthIndex, currentYear, prevMonthIndex, prevMonthYear, myNumbers, months) {
+function _mobileGetMonthlyComparisonData(ss, currentMonthIndex, currentYear, prevMonthIndex, prevMonthYear, myNumbers, months, customAssumptions) {
     var currentMonthName = months[currentMonthIndex];
     var prevMonthName = months[prevMonthIndex];
 
@@ -297,50 +330,173 @@ function _mobileGetMonthlyComparisonData(ss, currentMonthIndex, currentYear, pre
     // calls to _mobileGetSpreadsheetForYear(currentYear) return it immediately.
     if (!_mobileSSCache[currentYear]) _mobileSSCache[currentYear] = ss;
     var currentSS = ss;
-    var currentStats = _mobileGetMonthStats(currentSS, currentMonthName, currentYear, myNumbers);
+    var currentStats = _mobileGetMonthStats(currentSS, currentMonthName, currentYear, myNumbers, currentMonthIndex);
 
     var prevSS = (prevMonthYear === currentYear) ? currentSS : _mobileGetSpreadsheetForYear(prevMonthYear);
-    var prevStats = prevSS ? _mobileGetMonthStats(prevSS, prevMonthName, prevMonthYear, myNumbers) : null;
+    var prevStats = prevSS ? _mobileGetMonthStats(prevSS, prevMonthName, prevMonthYear, myNumbers, prevMonthIndex) : null;
 
     var yearAgoYear = currentYear - 1;
     var yearAgoSS = _mobileGetSpreadsheetForYear(yearAgoYear);
-    var yearAgoStats = yearAgoSS ? _mobileGetMonthStats(yearAgoSS, currentMonthName, yearAgoYear, myNumbers) : null;
+    var yearAgoStats = yearAgoSS ? _mobileGetMonthStats(yearAgoSS, currentMonthName, yearAgoYear, myNumbers, currentMonthIndex) : null;
 
-    // Projection multiplier
+    // Current date & cutoff within the month
     var now = new Date();
-    var currentDay = now.getDate();
     var daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
-    var oneThird = daysInMonth / 3;
-    var oneHalf = daysInMonth / 2;
+    var currentDay = Math.min(now.getDate(), daysInMonth);
 
-    var projectionMultiplier = 1;
-    var projectionLabel = 'actual (past mid-month)';
-    if (currentDay <= oneThird) {
-        projectionMultiplier = 2;
-        projectionLabel = '2× estimate (first 1/3 of month)';
-    } else if (currentDay <= oneHalf) {
-        projectionMultiplier = 1.2;
-        projectionLabel = '1.2× estimate (between 1/3 and 1/2 of month)';
+    // 1. Current month entered bills
+    var currentEnteredKeys = {};
+    var actualSpendToDate = currentStats ? currentStats.totalSpend : 0;
+
+    if (currentStats && currentStats.entries) {
+        currentStats.entries.forEach(function (e) {
+            var desc = (e.description || '').toLowerCase().trim();
+            var cat = (e.category || '').toLowerCase().trim();
+            if (desc) currentEnteredKeys[desc] = true;
+            if (cat) currentEnteredKeys[cat] = true;
+        });
     }
 
-    var estimatedCurrentSpend = currentStats ? currentStats.totalSpend * projectionMultiplier : 0;
+    // 2. Analyze prior completed months in the current year
+    var historicalBills = {};
+    var pastCompletedMonthsCount = 0;
+
+    for (var m = 0; m < currentMonthIndex; m++) {
+        var pastStats = _mobileGetMonthStats(currentSS, months[m], currentYear, myNumbers, m);
+        if (pastStats && pastStats.entries && pastStats.entries.length > 0) {
+            pastCompletedMonthsCount++;
+            pastStats.entries.forEach(function (e) {
+                var desc = (e.description || '').toLowerCase().trim();
+                var cat = (e.category || '').toLowerCase().trim();
+                var key = desc || cat;
+                if (!key) return;
+
+                if (!historicalBills[key]) {
+                    historicalBills[key] = {
+                        name: e.description || e.category,
+                        category: e.category,
+                        days: [],
+                        amounts: [],
+                        monthsSeen: {}
+                    };
+                }
+                historicalBills[key].days.push(e.day);
+                historicalBills[key].amounts.push(e.amount);
+                historicalBills[key].monthsSeen[m] = true;
+            });
+        }
+    }
+
+    // Fallback: If January (no prior completed months in current year), check prior year
+    if (pastCompletedMonthsCount === 0 && yearAgoSS) {
+        for (var pyM = 0; pyM < 12; pyM++) {
+            var pyStats = _mobileGetMonthStats(yearAgoSS, months[pyM], yearAgoYear, myNumbers, pyM);
+            if (pyStats && pyStats.entries && pyStats.entries.length > 0) {
+                pastCompletedMonthsCount++;
+                pyStats.entries.forEach(function (e) {
+                    var desc = (e.description || '').toLowerCase().trim();
+                    var cat = (e.category || '').toLowerCase().trim();
+                    var key = desc || cat;
+                    if (!key) return;
+
+                    if (!historicalBills[key]) {
+                        historicalBills[key] = {
+                            name: e.description || e.category,
+                            category: e.category,
+                            days: [],
+                            amounts: [],
+                            monthsSeen: {}
+                        };
+                    }
+                    historicalBills[key].days.push(e.day);
+                    historicalBills[key].amounts.push(e.amount);
+                    historicalBills[key].monthsSeen[pyM] = true;
+                });
+            }
+        }
+    }
+
+    // 3. Find bills that typically appear after day D and have not been entered yet
+    var projectedRemainingPosted = 0;
+    var expectedRemainingBills = [];
+
+    if (pastCompletedMonthsCount > 0) {
+        for (var billKey in historicalBills) {
+            var bill = historicalBills[billKey];
+            var billDesc = (bill.name || '').toLowerCase().trim();
+            var billCat = (bill.category || '').toLowerCase().trim();
+
+            if (currentEnteredKeys[billKey] || (billDesc && currentEnteredKeys[billDesc]) || (billCat && currentEnteredKeys[billCat])) {
+                continue;
+            }
+
+            var sumDays = 0;
+            for (var dIdx = 0; dIdx < bill.days.length; dIdx++) {
+                sumDays += bill.days[dIdx];
+            }
+            var avgDay = sumDays / bill.days.length;
+
+            if (avgDay > currentDay) {
+                var totalAmount = 0;
+                for (var aIdx = 0; aIdx < bill.amounts.length; aIdx++) {
+                    totalAmount += bill.amounts[aIdx];
+                }
+                var avgOccurAmount = totalAmount / bill.amounts.length;
+                var monthsCount = Object.keys(bill.monthsSeen).length;
+                var isRegular = monthsCount >= Math.ceil(pastCompletedMonthsCount / 2);
+                var billProjectedAmount = isRegular ? avgOccurAmount : (totalAmount / pastCompletedMonthsCount);
+
+                projectedRemainingPosted += billProjectedAmount;
+                expectedRemainingBills.push({
+                    name: bill.name,
+                    category: bill.category,
+                    expectedDay: Math.round(avgDay),
+                    amount: billProjectedAmount
+                });
+            }
+        }
+    }
+
+    // 4. Non-posted monthly projections from shared data (or custom assumptions)
+    var groceriesMonthly = (customAssumptions && customAssumptions.groceries !== undefined)
+        ? customAssumptions.groceries
+        : (myNumbers.agentGroceriesMonthly || 0);
+    var onlinePurchasesMonthly = (customAssumptions && customAssumptions.onlinePurchases !== undefined)
+        ? customAssumptions.onlinePurchases
+        : (myNumbers.agentOnlinePurchasesMonthly || 0);
+    var gasolineMonthly = (customAssumptions && customAssumptions.gasoline !== undefined)
+        ? customAssumptions.gasoline
+        : (myNumbers.agentGasolineMonthly || 0);
+    var miscMonthly = (customAssumptions && customAssumptions.misc !== undefined)
+        ? customAssumptions.misc
+        : (myNumbers.agentMiscMonthly || 0);
+    var nonPostedMonthly = groceriesMonthly + onlinePurchasesMonthly + gasolineMonthly + miscMonthly;
+
+    // 5. Final monthly spend forecast
+    var estimatedCurrentSpend = actualSpendToDate + projectedRemainingPosted + nonPostedMonthly;
+
+    var projectionLabel = expectedRemainingBills.length > 0
+        ? 'actual + ' + expectedRemainingBills.length + ' expected bills + non-posted'
+        : 'actual + non-posted assumptions';
 
     var vsPrevMonth = null;
     var vsYearAgo = null;
 
     if (currentStats && prevStats && prevStats.totalSpend > 0) {
-        var diff1 = estimatedCurrentSpend - prevStats.totalSpend;
+        var prevTotalWithNonPosted = prevStats.totalSpend + nonPostedMonthly;
+        var diff1 = estimatedCurrentSpend - prevTotalWithNonPosted;
         vsPrevMonth = {
             difference: diff1,
-            percentChange: ((diff1 / prevStats.totalSpend) * 100).toFixed(1)
+            percentChange: ((diff1 / prevTotalWithNonPosted) * 100).toFixed(1)
         };
     }
 
     if (currentStats && yearAgoStats && yearAgoStats.totalSpend > 0) {
-        var diff2 = estimatedCurrentSpend - yearAgoStats.totalSpend;
+        var yearAgoTotalWithNonPosted = yearAgoStats.totalSpend + nonPostedMonthly;
+        var diff2 = estimatedCurrentSpend - yearAgoTotalWithNonPosted;
         vsYearAgo = {
             difference: diff2,
-            percentChange: ((diff2 / yearAgoStats.totalSpend) * 100).toFixed(1)
+            percentChange: ((diff2 / yearAgoTotalWithNonPosted) * 100).toFixed(1)
         };
     }
 
@@ -357,10 +513,12 @@ function _mobileGetMonthlyComparisonData(ss, currentMonthIndex, currentYear, pre
         projection: {
             currentDay: currentDay,
             daysInMonth: daysInMonth,
-            multiplier: projectionMultiplier,
             label: projectionLabel,
             estimatedMonthlySpend: estimatedCurrentSpend,
-            actualSpendToDate: currentStats ? currentStats.totalSpend : 0
+            actualSpendToDate: actualSpendToDate,
+            projectedRemainingPosted: projectedRemainingPosted,
+            nonPostedMonthly: nonPostedMonthly,
+            expectedRemainingBills: expectedRemainingBills
         }
     };
 }
